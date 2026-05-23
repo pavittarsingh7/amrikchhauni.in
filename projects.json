@@ -1,0 +1,103 @@
+{
+  "projects": [
+    {
+      "name": "Amrik Chhauni — Hub",
+      "subdomain": "amrikchhauni.in",
+      "url": "https://amrikchhauni.in",
+      "description": "Central landing page listing all deployed projects on this development domain.",
+      "category": "Hub",
+      "remark": "Main entry point",
+      "note": "Testing & demo only",
+      "status": "Live",
+      "featured": true
+    },
+    {
+      "name": "Query Cart",
+      "subdomain": "qc.amrikchhauni.in",
+      "url": "https://qc.amrikchhauni.in",
+      "description": "Negotiation-first marketplace for modern commerce teams.",
+      "category": "Pavittar",
+      "remark": "",
+      "note": "Client project",
+      "status": "Live",
+      "featured": false
+    },
+    {
+      "name": "Pavittar Portfolio",
+      "subdomain": "ps.amrikchhauni.in",
+      "url": "https://ps.amrikchhauni.in",
+      "description": "Pavittar's Resume / Portfolio site.",
+      "category": "Hobby",
+      "remark": "",
+      "note": "",
+      "status": "Live",
+      "featured": false
+    },
+    {
+      "name": "SCS",
+      "subdomain": "scs.amrikchhauni.in",
+      "url": "https://scs.amrikchhauni.in",
+      "description": "Smart Computer Solutions - A small business/shop website.",
+      "category": "Pavittar",
+      "remark": "",
+      "note": "",
+      "status": "Live",
+      "featured": false
+    },
+    {
+      "name": "Development Sandbox",
+      "subdomain": "ds.amrikchhauni.in",
+      "url": "https://ds.amrikchhauni.in",
+      "description": "Experimental builds, prototypes, and work-in-progress features.",
+      "category": "Development",
+      "remark": "May be unstable",
+      "note": "Not for production use",
+      "status": "Beta",
+      "featured": false
+    },
+    {
+      "name": "GSMS",
+      "subdomain": "gsms.amrikchhauni.in",
+      "url": "https://gsms.amrikchhauni.in",
+      "description": "Gurdwara Sahib Management System",
+      "category": "Hobby",
+      "remark": "",
+      "note": "",
+      "status": "Planned",
+      "featured": false
+    },
+    {
+      "name": "ID Card Generator",
+      "subdomain": "idcardgenerator.amrikchhauni.in",
+      "url": "https://idcardgenerator.amrikchhauni.in",
+      "description": "Generate downloadable ID cards from custom templates.",
+      "category": "Hobby",
+      "remark": "",
+      "note": "",
+      "status": "Live",
+      "featured": true
+    },
+    {
+      "name": "WA Dashboard",
+      "subdomain": "wa.amrikchhauni.in",
+      "url": "https://wa.amrikchhauni.in",
+      "description": "WhatsApp-related utilities of Sanjeev's.",
+      "category": "Sanjeev",
+      "remark": "Office related",
+      "note": "",
+      "status": "Live",
+      "featured": false
+    },
+    {
+      "name": "Taste of Panjab",
+      "subdomain": "tasteofpanjab.amrikchhauni.in",
+      "url": "https://tasteofpanjab.amrikchhauni.in",
+      "description": "Restaurant showcase site.",
+      "category": "Amrik",
+      "remark": ".Net + Angular Project",
+      "note": "",
+      "status": "Live",
+      "featured": true
+    }
+  ]
+}
