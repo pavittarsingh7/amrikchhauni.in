@@ -41,7 +41,7 @@
       "category": "Pavittar",
       "remark": "",
       "note": "",
-      "status": "Live",
+      "status": "Planned",
       "featured": false
     },
     {
@@ -63,7 +63,7 @@
       "category": "Hobby",
       "remark": "",
       "note": "",
-      "status": "Planned",
+      "status": "UnderConstruction",
       "featured": false
     },
     {
@@ -75,7 +75,7 @@
       "remark": "",
       "note": "",
       "status": "Live",
-      "featured": true
+      "featured": false
     },
     {
       "name": "WA Dashboard",
@@ -98,6 +98,17 @@
       "note": "",
       "status": "Live",
       "featured": true
+    },
+    {
+      "name": "Smart Kharcha AI",
+      "subdomain": "kharcha.amrikchhauni.in",
+      "url": "https://kharcha.amrikchhauni.in",
+      "description": "Production-ready financial management web app",
+      "category": "Hobby",
+      "remark": "",
+      "note": "",
+      "status": "UnderConstruction",
+      "featured": false
     }
   ]
 }
