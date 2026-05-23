@@ -398,22 +398,23 @@
 
       initTheme();
 
-      fetch('projects.json')
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to fetch');
-          return res.json();
-        })
-        .then((data) => {
-          allProjects = data.projects || [];
-          loading.classList.add('hidden');
-          populateFilters(allProjects);
-          renderStats(allProjects);
-          render();
-        })
-        .catch(() => {
-          loading.classList.add('hidden');
-          errorEl.classList.remove('hidden');
-        });
+      const url = `projects.json?_=${Date.now()}`;
+      return fetch(url, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+      }).then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      }).then((data) => {
+        allProjects = data.projects || [];
+        loading.classList.add('hidden');
+        populateFilters(allProjects);
+        renderStats(allProjects);
+        render();
+      }).catch(() => {
+        loading.classList.add('hidden');
+        errorEl.classList.remove('hidden');
+      });
     })();
   </script>
 </body>
