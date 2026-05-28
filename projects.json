@@ -120,6 +120,28 @@
       "note": "",
       "status": "Live",
       "featured": false
+    },
+    {
+      "name": "Score",
+      "subdomain": "score.amrikchhauni.in",
+      "url": "https://score.amrikchhauni.in",
+      "description": "Score",
+      "category": "Amrik",
+      "remark": ".Net",
+      "note": "",
+      "status": "UnderConstruction",
+      "featured": false
+    },
+    {
+      "name": "Umpiring",
+      "subdomain": "umpire.amrikchhauni.in",
+      "url": "https://umpring.amrikchhauni.in",
+      "description": "Umpring",
+      "category": "Amrik",
+      "remark": ".Net",
+      "note": "",
+      "status": "UnderConstruction",
+      "featured": false
     }
   ]
 }
