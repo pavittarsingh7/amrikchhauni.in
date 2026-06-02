@@ -9,7 +9,8 @@
       "remark": "Main entry point",
       "note": "Testing & demo only",
       "status": "Live",
-      "featured": true
+      "featured": true,
+      "port": 443
     },
     {
       "name": "Query Cart",
@@ -20,7 +21,8 @@
       "remark": "",
       "note": "Client project",
       "status": "Live",
-      "featured": false
+      "featured": false,
+      "port": 4800
     },
     {
       "name": "Pavittar Portfolio",
@@ -31,7 +33,8 @@
       "remark": "",
       "note": "",
       "status": "Live",
-      "featured": false
+      "featured": false,
+      "port": 5001
     },
     {
       "name": "SCS",
@@ -42,7 +45,8 @@
       "remark": "",
       "note": "",
       "status": "Planned",
-      "featured": false
+      "featured": false,
+      "port": 5002
     },
     {
       "name": "Development Sandbox",
@@ -53,7 +57,20 @@
       "remark": "May be unstable",
       "note": "Not for production use",
       "status": "Beta",
-      "featured": false
+      "featured": false,
+      "port": 9090
+    },
+    {
+      "name": "Under Construction Sandbox",
+      "subdomain": "ucmd.amrikchhauni.in",
+      "url": "https://ucmd.amrikchhauni.in",
+      "description": "Under Construction Management Dashboard",
+      "category": "Development",
+      "remark": "Only for internal use",
+      "note": "localhost port management",
+      "status": "Live",
+      "featured": false,
+      "port": 9091
     },
     {
       "name": "GSMS",
@@ -64,18 +81,20 @@
       "remark": "",
       "note": "",
       "status": "UnderConstruction",
-      "featured": false
+      "featured": false,
+      "port": 5005
     },
     {
       "name": "ID Card Generator",
       "subdomain": "idcardgenerator.amrikchhauni.in",
       "url": "https://idcardgenerator.amrikchhauni.in",
       "description": "Generate downloadable ID cards from custom templates.",
-      "category": "Hobby",
-      "remark": "",
-      "note": "",
+      "category": "Pavittar",
+      "remark": "Malkiat Singh Saibhang",
+      "note": "Asees DRMS Project",
       "status": "Live",
-      "featured": false
+      "featured": false,
+      "port": 4900
     },
     {
       "name": "WA Dashboard",
@@ -86,7 +105,8 @@
       "remark": "Office related",
       "note": "",
       "status": "Live",
-      "featured": false
+      "featured": false,
+      "port": 6002
     },
     {
       "name": "Taste of Panjab",
@@ -97,7 +117,8 @@
       "remark": ".Net + Angular Project",
       "note": "",
       "status": "Live",
-      "featured": true
+      "featured": true,
+      "port": 4001
     },
     {
       "name": "Smart Kharcha AI",
@@ -108,7 +129,8 @@
       "remark": "",
       "note": "",
       "status": "UnderConstruction",
-      "featured": false
+      "featured": false,
+      "port": 5003
     },
     {
       "name": "Divine Dhun",
@@ -119,7 +141,8 @@
       "remark": "",
       "note": "",
       "status": "Live",
-      "featured": false
+      "featured": false,
+      "port": 5004
     },
     {
       "name": "Score",
@@ -130,18 +153,32 @@
       "remark": ".Net",
       "note": "",
       "status": "UnderConstruction",
-      "featured": false
+      "featured": false,
+      "port": 4002
     },
     {
       "name": "Umpiring",
-      "subdomain": "umpire.amrikchhauni.in",
-      "url": "https://umpring.amrikchhauni.in",
-      "description": "Umpring",
+      "subdomain": "umpiring.amrikchhauni.in",
+      "url": "https://umpiring.amrikchhauni.in",
+      "description": "Umpiring",
       "category": "Amrik",
       "remark": ".Net",
       "note": "",
       "status": "UnderConstruction",
-      "featured": false
+      "featured": false,
+      "port": 4003
+    },
+    {
+      "name": "E-Jagriti Sync",
+      "subdomain": "ejdata.amrikchhauni.in",
+      "url": "https://ejdata.amrikchhauni.in",
+      "description": "E-Jagriti Data Sync Service",
+      "category": "Sanjeev",
+      "remark": "",
+      "note": "",
+      "status": "UnderConstruction",
+      "featured": false,
+      "port": 6003
     }
   ]
 }
