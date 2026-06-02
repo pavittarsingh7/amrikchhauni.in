@@ -2,7 +2,7 @@
   "projects": [
     {
       "name": "Amrik Chhauni — Hub",
-      "subdomain": "amrikchhauni.in",
+      "subdomain": "Primary Domain",
       "url": "https://amrikchhauni.in",
       "description": "Central landing page listing all deployed projects on this development domain.",
       "category": "Hub",
@@ -14,7 +14,7 @@
     },
     {
       "name": "Query Cart",
-      "subdomain": "qc.amrikchhauni.in",
+      "subdomain": "qc",
       "url": "https://qc.amrikchhauni.in",
       "description": "Negotiation-first marketplace for modern commerce teams.",
       "category": "Pavittar",
@@ -26,7 +26,7 @@
     },
     {
       "name": "Pavittar Portfolio",
-      "subdomain": "ps.amrikchhauni.in",
+      "subdomain": "ps",
       "url": "https://ps.amrikchhauni.in",
       "description": "Pavittar's Resume / Portfolio site.",
       "category": "Hobby",
@@ -38,7 +38,7 @@
     },
     {
       "name": "SCS",
-      "subdomain": "scs.amrikchhauni.in",
+      "subdomain": "scs",
       "url": "https://scs.amrikchhauni.in",
       "description": "Smart Computer Solutions - A small business/shop website.",
       "category": "Pavittar",
@@ -50,7 +50,7 @@
     },
     {
       "name": "Development Sandbox",
-      "subdomain": "ds.amrikchhauni.in",
+      "subdomain": "ds",
       "url": "https://ds.amrikchhauni.in",
       "description": "Experimental builds, prototypes, and work-in-progress features.",
       "category": "Development",
@@ -62,7 +62,7 @@
     },
     {
       "name": "Under Construction Sandbox",
-      "subdomain": "ucmd.amrikchhauni.in",
+      "subdomain": "ucmd",
       "url": "https://ucmd.amrikchhauni.in",
       "description": "Under Construction Management Dashboard",
       "category": "Development",
@@ -74,7 +74,7 @@
     },
     {
       "name": "GSMS",
-      "subdomain": "gsms.amrikchhauni.in",
+      "subdomain": "gsms",
       "url": "https://gsms.amrikchhauni.in",
       "description": "Gurdwara Sahib Management System",
       "category": "Hobby",
@@ -86,7 +86,7 @@
     },
     {
       "name": "ID Card Generator",
-      "subdomain": "idcardgenerator.amrikchhauni.in",
+      "subdomain": "idcardgenerator",
       "url": "https://idcardgenerator.amrikchhauni.in",
       "description": "Generate downloadable ID cards from custom templates.",
       "category": "Pavittar",
@@ -98,7 +98,7 @@
     },
     {
       "name": "WA Dashboard",
-      "subdomain": "wa.amrikchhauni.in",
+      "subdomain": "wa",
       "url": "https://wa.amrikchhauni.in",
       "description": "WhatsApp-related utilities of Sanjeev's.",
       "category": "Sanjeev",
@@ -110,7 +110,7 @@
     },
     {
       "name": "Taste of Panjab",
-      "subdomain": "tasteofpanjab.amrikchhauni.in",
+      "subdomain": "tasteofpanjab",
       "url": "https://tasteofpanjab.amrikchhauni.in",
       "description": "Restaurant showcase site.",
       "category": "Amrik",
@@ -122,7 +122,7 @@
     },
     {
       "name": "Smart Kharcha AI",
-      "subdomain": "kharcha.amrikchhauni.in",
+      "subdomain": "kharcha",
       "url": "https://kharcha.amrikchhauni.in",
       "description": "Production-ready financial management web app",
       "category": "Hobby",
@@ -134,7 +134,7 @@
     },
     {
       "name": "Divine Dhun",
-      "subdomain": "dd.amrikchhauni.in",
+      "subdomain": "dd",
       "url": "https://dd.amrikchhauni.in",
       "description": "Divine Dhun -Sacred Music Streaming.",
       "category": "Hobby",
@@ -146,7 +146,7 @@
     },
     {
       "name": "Score",
-      "subdomain": "score.amrikchhauni.in",
+      "subdomain": "score",
       "url": "https://score.amrikchhauni.in",
       "description": "Score",
       "category": "Amrik",
@@ -158,7 +158,7 @@
     },
     {
       "name": "Umpiring",
-      "subdomain": "umpiring.amrikchhauni.in",
+      "subdomain": "umpiring",
       "url": "https://umpiring.amrikchhauni.in",
       "description": "Umpiring",
       "category": "Amrik",
@@ -170,7 +170,7 @@
     },
     {
       "name": "E-Jagriti Sync",
-      "subdomain": "ejdata.amrikchhauni.in",
+      "subdomain": "ejdata",
       "url": "https://ejdata.amrikchhauni.in",
       "description": "E-Jagriti Data Sync Service",
       "category": "Sanjeev",
