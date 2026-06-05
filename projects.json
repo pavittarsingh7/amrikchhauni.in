@@ -179,6 +179,18 @@
       "status": "UnderConstruction",
       "featured": false,
       "port": 6003
+    },
+    {
+      "name": "Punjab Sports Hub",
+      "subdomain": "psh",
+      "url": "https://psh.amrikchhauni.in",
+      "description": "Punjab Sports Hub - ERP System",
+      "category": "Hobby",
+      "remark": "",
+      "note": "",
+      "status": "Live",
+      "featured": false,
+      "port": 5006
     }
   ]
 }
