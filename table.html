@@ -6,52 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Tabular view of projects hosted on amrikchhauni.in subdomains." />
   <title>amrikchhauni.in — Projects Table View</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
-            display: ['"Instrument Sans"', 'system-ui', 'sans-serif'],
-          },
-          animation: {
-            'fade-up': 'fadeUp 0.7s ease-out forwards',
-            'fade-up-delay': 'fadeUp 0.7s ease-out 0.15s forwards',
-            'fade-up-delay-2': 'fadeUp 0.7s ease-out 0.3s forwards',
-          },
-          keyframes: {
-            fadeUp: {
-              '0%': { opacity: '0', transform: 'translateY(16px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            },
-          },
-        },
-      },
-    };
-  </script>
+  <link rel="stylesheet" href="styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Sans:wght@500;600;700&display=swap"
     rel="stylesheet" />
-  <style>
-    .opacity-0-start {
-      opacity: 0;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-
-      *,
-      *::before,
-      *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-  </style>
 </head>
 
 <body
@@ -429,6 +389,16 @@
           loading.classList.add('hidden');
           errorEl.classList.remove('hidden');
         });
+
+      // Fallback: reveal content if entrance animations never run
+      setTimeout(function () {
+        document.querySelectorAll('.opacity-0-start').forEach(function (el) {
+          if (window.getComputedStyle(el).opacity === '0') {
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+          }
+        });
+      }, 1500);
     })();
   </script>
 </body>

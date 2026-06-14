@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .opacity-0-start {
+    opacity: 0;
+  }
+
+  .card-stagger {
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .opacity-0-start {
+    opacity: 1 !important;
+  }
+}
+
+/* Ensure content is visible if animations fail to run (e.g. older Safari edge cases) */
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-up,
+.animate-fade-up-delay,
+.animate-fade-up-delay-2,
+.animate-card-in {
+  animation-fill-mode: forwards;
+}
