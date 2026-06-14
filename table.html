@@ -291,12 +291,16 @@
       }
 
       function renderStats(projects) {
-        const live = projects.filter((p) => p.status === 'Live').length;
         const featured = projects.filter((p) => p.featured).length;
+        const live = projects.filter((p) => p.status === 'Live').length;
+        const underConstruction = projects.filter((p) => p.status === 'UnderConstruction').length;
+        const planned = projects.filter((p) => p.status === 'Planned').length;
         stats.innerHTML = `
           <span class="rounded-lg bg-white/80 px-3 py-1.5 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-900/80 dark:ring-slate-800"><strong class="text-slate-800 dark:text-slate-200">${projects.length}</strong> projects</span>
           <span class="rounded-lg bg-white/80 px-3 py-1.5 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-900/80 dark:ring-slate-800"><strong class="text-slate-800 dark:text-slate-200">${live}</strong> live</span>
           <span class="rounded-lg bg-white/80 px-3 py-1.5 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-900/80 dark:ring-slate-800"><strong class="text-slate-800 dark:text-slate-200">${featured}</strong> featured</span>
+          <span class="rounded-lg bg-white/80 px-3 py-1.5 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-900/80 dark:ring-slate-800"><strong class="text-slate-800 dark:text-slate-200">${underConstruction}</strong> under construction</span>
+          <span class="rounded-lg bg-white/80 px-3 py-1.5 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-900/80 dark:ring-slate-800"><strong class="text-slate-800 dark:text-slate-200">${planned}</strong> planned</span>
         `;
       }
 

@@ -191,6 +191,42 @@
       "status": "Live",
       "featured": false,
       "port": 5006
+    },
+    {
+      "name": "Aanchal Amruttulya Franchise",
+      "subdomain": "aaph",
+      "url": "https://aaph.amrikchhauni.in",
+      "description": "Aanchal Amruttulya Franchise - Start Your Own Tea & Pizza Franchise Business",
+      "category": "Pavittar",
+      "remark": "",
+      "note": "Aranpreet Project",
+      "status": "Live",
+      "featured": false,
+      "port": 5006
+    },
+    {
+      "name": "SCDRC",
+      "subdomain": "scdrc",
+      "url": "https://scdrc.amrikchhauni.in",
+      "description": "New - SCDRC website",
+      "category": "Sanjeev",
+      "remark": "",
+      "note": "",
+      "status": "UnderConstruction",
+      "featured": false,
+      "port": 6005
+    },
+    {
+      "name": "E-Briefly",
+      "subdomain": "ebriefly",
+      "url": "https://ebriefly.amrikchhauni.in",
+      "description": "E-Briefly website",
+      "category": "Sanjeev",
+      "remark": "",
+      "note": "",
+      "status": "Live",
+      "featured": false,
+      "port": 6001
     }
   ]
 }
