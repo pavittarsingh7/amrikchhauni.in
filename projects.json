@@ -181,6 +181,18 @@
       "port": 6003
     },
     {
+      "name": "Court Room Automation",
+      "subdomain": "courtroomautomation",
+      "url": "https://courtroomautomation.amrikchhauni.in",
+      "description": "E-Jagriti Court Room Automation - Backend",
+      "category": "Sanjeev",
+      "remark": "Python",
+      "note": "used in ejdata app",
+      "status": "Live",
+      "featured": false,
+      "port": 6004
+    },
+    {
       "name": "Punjab Sports Hub",
       "subdomain": "psh",
       "url": "https://psh.amrikchhauni.in",
