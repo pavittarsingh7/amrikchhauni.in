@@ -1,0 +1,19 @@
+@import "tailwindcss";
+@import "@heroui/styles/css";
+
+@theme {
+  --color-acdm-primary: #0066cc;
+  --color-acdm-secondary: #1a1a2e;
+  --color-acdm-accent: #e94560;
+  --color-acdm-surface: #16213e;
+  --color-acdm-muted: #94a3b8;
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased;
+}
+
+/* HeroUI modal overlay portals — ensure above app shell (sidebar z-10) */
+[data-slot="modal-backdrop"] {
+  z-index: 100;
+}

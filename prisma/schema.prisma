@@ -1,0 +1,474 @@
+// ACDM — Amrik Chhauni Deployment Manager
+// Prisma Schema — Phase 1 Foundation
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMINISTRATOR
+  VIEWER
+}
+
+enum PortStatus {
+  AVAILABLE
+  RESERVED
+  IN_USE
+  UNDER_CONSTRUCTION
+}
+
+enum ApplicationStatus {
+  LIVE
+  PLANNED
+  BETA
+  UNDER_CONSTRUCTION
+  ARCHIVED
+}
+
+enum DiscoveryStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum BackupType {
+  DATABASE
+  NGINX
+  SSL
+  SETTINGS
+  FULL
+}
+
+enum BackupStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum ServiceAction {
+  START
+  STOP
+  RESTART
+}
+
+enum MaintenanceScope {
+  SITE
+  SERVER
+}
+
+// ─── Auth & Users ──────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole @default(VIEWER)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  createdApplications Application[] @relation("ApplicationCreatedBy")
+  auditLogs           AuditLog[]
+
+  @@map("users")
+}
+
+// ─── Settings (all paths configurable) ─────────────────────────────────────
+
+model Setting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  category    String   @default("general")
+  label       String?
+  description String?
+  isSecret    Boolean  @default(false) @map("is_secret")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("settings")
+}
+
+// ─── Server Registry ───────────────────────────────────────────────────────
+
+model Server {
+  id                String   @id @default(cuid())
+  name              String
+  hostname          String
+  ipAddress         String?  @map("ip_address")
+  operatingSystem   String?  @map("operating_system")
+  environment       String   @default("production")
+  active            Boolean  @default(true)
+  isCurrent         Boolean  @default(false) @map("is_current")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("servers")
+}
+
+// ─── Master Tables ───────────────────────────────────────────────────────────
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  company   String?
+  email     String?
+  phone     String?
+  notes     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  applications Application[]
+
+  @@map("clients")
+}
+
+model IdeaSource {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  applications Application[]
+
+  @@map("idea_sources")
+}
+
+model Technology {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  applications Application[]
+
+  @@map("technologies")
+}
+
+model DeploymentType {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  applications Application[]
+
+  @@map("deployment_types")
+}
+
+// ─── Applications ────────────────────────────────────────────────────────────
+
+model Application {
+  id               String            @id @default(cuid())
+  name             String
+  description      String?
+  clientId         String?           @map("client_id")
+  ideaSourceId     String?           @map("idea_source_id")
+  createdById      String?           @map("created_by_id")
+  technologyId     String?           @map("technology_id")
+  deploymentTypeId String?           @map("deployment_type_id")
+  repositoryUrl    String?           @map("repository_url")
+  branch           String?           @default("main")
+  projectPath      String?           @map("project_path")
+  buildCommand     String?           @map("build_command")
+  startCommand     String?           @map("start_command")
+  status           ApplicationStatus @default(PLANNED)
+  notes            String?
+  remarks          String?
+  featured         Boolean           @default(false)
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  client         Client?         @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  ideaSource     IdeaSource?     @relation(fields: [ideaSourceId], references: [id], onDelete: SetNull)
+  createdBy      User?           @relation("ApplicationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  technology     Technology?     @relation(fields: [technologyId], references: [id], onDelete: SetNull)
+  deploymentType DeploymentType? @relation(fields: [deploymentTypeId], references: [id], onDelete: SetNull)
+
+  domains      Domain[]
+  ports        Port[]
+  pm2Processes Pm2Process[]
+  iisSites     IisSite[]
+  maintenance  MaintenanceConfig[]
+
+  @@index([status])
+  @@index([clientId])
+  @@map("applications")
+}
+
+// ─── Domains ─────────────────────────────────────────────────────────────────
+
+model Domain {
+  id              String   @id @default(cuid())
+  hostname        String   @unique
+  subdomain       String?
+  sslEnabled      Boolean  @default(false) @map("ssl_enabled")
+  proxyPass       String?  @map("proxy_pass")
+  rootPath        String?  @map("root_path")
+  targetPort      Int?     @map("target_port")
+  nginxConfigPath String?  @map("nginx_config_path")
+  applicationId   String?  @map("application_id")
+  discovered      Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  application Application?        @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  maintenance MaintenanceConfig[]
+
+  @@index([applicationId])
+  @@map("domains")
+}
+
+// ─── Port Registry ───────────────────────────────────────────────────────────
+
+model Port {
+  id            String     @id @default(cuid())
+  number        Int        @unique
+  status        PortStatus @default(AVAILABLE)
+  applicationId String?    @map("application_id")
+  notes         String?
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("ports")
+}
+
+// ─── Nginx ───────────────────────────────────────────────────────────────────
+
+model NginxConfig {
+  id          String   @id @default(cuid())
+  filename    String   @unique
+  filepath    String
+  content     String?  @db.Text
+  domain      String?
+  enabled     Boolean  @default(true)
+  lastTested  DateTime? @map("last_tested")
+  testPassed  Boolean?  @map("test_passed")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  backups NginxConfigBackup[]
+
+  @@map("nginx_configs")
+}
+
+model NginxConfigBackup {
+  id            String   @id @default(cuid())
+  nginxConfigId String   @map("nginx_config_id")
+  content       String   @db.Text
+  filepath      String
+  reason        String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  nginxConfig NginxConfig @relation(fields: [nginxConfigId], references: [id], onDelete: Cascade)
+
+  @@index([nginxConfigId])
+  @@map("nginx_config_backups")
+}
+
+// ─── PM2 ─────────────────────────────────────────────────────────────────────
+
+model Pm2Process {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  status        String?
+  port          Int?
+  pid           Int?
+  uptime        String?
+  restarts      Int      @default(0)
+  ecosystemPath String?  @map("ecosystem_path")
+  applicationId String?  @map("application_id")
+  discovered    Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@index([applicationId])
+  @@map("pm2_processes")
+}
+
+// ─── IIS ─────────────────────────────────────────────────────────────────────
+
+model IisSite {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  bindings      Json?
+  appPool       String?  @map("app_pool")
+  physicalPath  String?  @map("physical_path")
+  state         String?
+  pattern       String?
+  applicationId String?  @map("application_id")
+  discovered    Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@index([applicationId])
+  @@map("iis_sites")
+}
+
+// ─── SSL ─────────────────────────────────────────────────────────────────────
+
+model SslCertificate {
+  id           String    @id @default(cuid())
+  domain       String
+  issuer       String?
+  subject      String?
+  thumbprint   String?   @unique
+  serialNumber String?   @map("serial_number")
+  notBefore    DateTime? @map("not_before")
+  notAfter     DateTime? @map("not_after")
+  storePath    String?   @map("store_path")
+  winAcmeId    String?   @map("win_acme_id")
+  autoRenew    Boolean   @default(true) @map("auto_renew")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([domain])
+  @@index([notAfter])
+  @@map("ssl_certificates")
+}
+
+// ─── Maintenance ─────────────────────────────────────────────────────────────
+
+model MaintenancePage {
+  id              String   @id @default(cuid())
+  title           String   @default("Under Maintenance")
+  description     String?  @db.Text
+  expectedReturn  String?  @map("expected_return")
+  logoPath        String?  @map("logo_path")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("maintenance_pages")
+}
+
+model MaintenanceConfig {
+  id              String           @id @default(cuid())
+  scope           MaintenanceScope
+  enabled         Boolean          @default(false)
+  domainId        String?          @map("domain_id")
+  applicationId   String?          @map("application_id")
+  includeFilePath String?          @map("include_file_path")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  domain      Domain?      @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@index([applicationId])
+  @@map("maintenance_configs")
+}
+
+// ─── Windows Services ────────────────────────────────────────────────────────
+
+model WindowsService {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String?  @map("display_name")
+  status      String?
+  startType   String?  @map("start_type")
+  whitelisted Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("windows_services")
+}
+
+// ─── Backups ─────────────────────────────────────────────────────────────────
+
+model Backup {
+  id          String       @id @default(cuid())
+  type        BackupType
+  status      BackupStatus @default(PENDING)
+  filename    String
+  filepath    String
+  sizeBytes   BigInt?      @map("size_bytes")
+  scheduled   Boolean      @default(false)
+  completedAt DateTime?    @map("completed_at")
+  error       String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  @@index([type])
+  @@index([status])
+  @@map("backups")
+}
+
+// ─── Discovery Suggestions ───────────────────────────────────────────────────
+
+model DiscoverySuggestion {
+  id           String          @id @default(cuid())
+  type         String
+  source       String
+  name         String
+  data         Json
+  status       DiscoveryStatus @default(PENDING)
+  reviewedAt   DateTime?       @map("reviewed_at")
+  reviewNotes  String?         @map("review_notes")
+  createdAt    DateTime        @default(now()) @map("created_at")
+  updatedAt    DateTime        @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([type])
+  @@map("discovery_suggestions")
+}
+
+// ─── Audit Logs ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  username  String?
+  action    String
+  module    String
+  entityId  String?  @map("entity_id")
+  before    Json?
+  after     Json?
+  ipAddress String?  @map("ip_address")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([module])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─── JSON Snapshots (metadata) ───────────────────────────────────────────────
+
+model Snapshot {
+  id        String   @id @default(cuid())
+  entity    String
+  entityId  String?  @map("entity_id")
+  filepath  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([entity])
+  @@index([entityId])
+  @@map("snapshots")
+}
