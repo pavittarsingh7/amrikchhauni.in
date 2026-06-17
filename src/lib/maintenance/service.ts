@@ -2,11 +2,102 @@ import fs from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/db/prisma";
 import { writeAuditLog } from "@/lib/audit/logger";
-import { getPathSetting } from "@/lib/settings/service";
 import { testNginxConfig, reloadNginx } from "@/lib/nginx/service";
+import {
+  applyMaintenanceToContent,
+  backupNginxConfigFile,
+  ensureMaintenanceSnippetFiles,
+  isMaintenanceNginxContent,
+  resolveNginxConfigForDomain,
+  rollbackNginxChanges,
+  writeNginxConfigFile,
+  type NginxRollbackEntry,
+} from "./nginx-config";
+import {
+  buildGlobalMaintenanceMarker,
+  getMaintenanceDir,
+  getNginxMaintenanceDir,
+} from "./templates";
 
-async function getMaintenanceDir(): Promise<string> {
-  return getPathSetting("paths.maintenance");
+export type MaintenancePreview = {
+  hostname: string;
+  nginxConfigPath: string;
+  original: string;
+  proposed: string;
+  action: "enable" | "disable" | "no-change";
+};
+
+async function isServerMaintenanceEnabled(): Promise<boolean> {
+  const server = await prisma.maintenanceConfig.findFirst({
+    where: { scope: "SERVER" },
+  });
+  return server?.enabled ?? false;
+}
+
+async function getSiteMaintenanceConfig(domainId: string) {
+  return prisma.maintenanceConfig.findFirst({
+    where: { domainId, scope: "SITE" },
+  });
+}
+
+async function shouldDomainBeInMaintenance(
+  domainId: string,
+  serverEnabled: boolean,
+  siteEnabled?: boolean
+): Promise<boolean> {
+  if (serverEnabled) return true;
+  if (siteEnabled !== undefined) return siteEnabled;
+  const site = await getSiteMaintenanceConfig(domainId);
+  return site?.enabled ?? false;
+}
+
+async function readNginxContent(config: { filepath: string; content: string | null }) {
+  return (
+    (await fs.readFile(config.filepath, "utf-8").catch(() => null)) ??
+    config.content ??
+    ""
+  );
+}
+
+async function writeGlobalMaintenanceMarker(
+  enabled: boolean,
+  siteCount: number
+): Promise<void> {
+  const nginxMaintenanceDir = await getNginxMaintenanceDir();
+  await fs.mkdir(nginxMaintenanceDir, { recursive: true });
+  await fs.writeFile(
+    path.join(nginxMaintenanceDir, "global-maintenance.conf"),
+    buildGlobalMaintenanceMarker(enabled, siteCount),
+    "utf-8"
+  );
+}
+
+async function upsertSiteMaintenanceRecord(
+  domainId: string,
+  data: {
+    enabled: boolean;
+    nginxConfigId?: string | null;
+    originalContent?: string | null;
+    includeFilePath?: string | null;
+  }
+) {
+  const existing = await getSiteMaintenanceConfig(domainId);
+  if (existing) {
+    return prisma.maintenanceConfig.update({
+      where: { id: existing.id },
+      data,
+    });
+  }
+  return prisma.maintenanceConfig.create({
+    data: {
+      scope: "SITE",
+      domainId,
+      enabled: data.enabled,
+      nginxConfigId: data.nginxConfigId ?? null,
+      originalContent: data.originalContent ?? null,
+      includeFilePath: data.includeFilePath ?? null,
+    },
+  });
 }
 
 export async function getMaintenancePage() {
@@ -90,7 +181,7 @@ async function generateMaintenanceHtml(page: {
 </body>
 </html>`;
 
-  await fs.writeFile(path.join(dir, "page.html"), html, "utf-8");
+  await fs.writeFile(path.join(dir, "index.html"), html, "utf-8");
 }
 
 function escapeHtml(str: string): string {
@@ -111,84 +202,146 @@ export async function listMaintenanceConfigs() {
   });
 }
 
-async function ensureNginxMaintenanceSetup(maintenanceDir: string) {
-  const nginxConfPath = await getPathSetting("paths.nginx_conf");
-  const nginxConf = path.join(nginxConfPath, "nginx.conf");
-  const mapPath = path.join(maintenanceDir, "acdm-map.conf").replace(/\\/g, "/");
-  const includeLine = `include ${mapPath};`;
+export async function previewDomainMaintenanceState(
+  domainId: string,
+  opts: { siteEnabled: boolean; serverEnabled: boolean }
+): Promise<MaintenancePreview> {
+  const domain = await prisma.domain.findUnique({ where: { id: domainId } });
+  if (!domain) throw new Error("Domain not found");
 
-  let confContent = await fs.readFile(nginxConf, "utf-8");
-  if (!confContent.includes("acdm-map.conf")) {
-    confContent = confContent.replace(
-      /(\s*include\s+D:\/nginx\/conf\/sites\/\*\.conf;)/,
-      `\n    ${includeLine}\n$1`
-    );
-    await fs.writeFile(nginxConf, confContent, "utf-8");
+  const nginxConfig = await resolveNginxConfigForDomain(domain);
+  if (!nginxConfig) {
+    throw new Error(`No nginx config found for ${domain.hostname}`);
   }
 
-  const proxyCommonPath = path.join(nginxConfPath, "snippets", "proxy-common.conf");
-  let proxyContent = await fs.readFile(proxyCommonPath, "utf-8");
-  const maintenanceCheck = `if ($acdm_maintenance) { return 503; }`;
-  if (!proxyContent.includes("$acdm_maintenance")) {
-    proxyContent = `${maintenanceCheck}\n${proxyContent}`;
-    await fs.writeFile(proxyCommonPath, proxyContent, "utf-8");
+  const wantMaintenance = opts.serverEnabled || opts.siteEnabled;
+  const current = await readNginxContent(nginxConfig);
+  const siteConfig = await getSiteMaintenanceConfig(domainId);
+  const storedOriginal = siteConfig?.originalContent ?? null;
+
+  const maintenanceDir = await getMaintenanceDir();
+  const { websiteMaintenanceConf } = await ensureMaintenanceSnippetFiles(
+    maintenanceDir
+  );
+
+  let proposed = current;
+  let action: MaintenancePreview["action"] = "no-change";
+
+  if (wantMaintenance && !isMaintenanceNginxContent(current)) {
+    proposed = applyMaintenanceToContent(current, websiteMaintenanceConf);
+    action = "enable";
+  } else if (!wantMaintenance && isMaintenanceNginxContent(current)) {
+    if (!storedOriginal) {
+      throw new Error(
+        `Original nginx config not stored for ${domain.hostname} — cannot preview restore`
+      );
+    }
+    proposed = storedOriginal;
+    action = "disable";
   }
 
-  const errorPageBlock = `
-error_page 503 /acdm-maintenance.html;
-location = /acdm-maintenance.html {
-    root ${maintenanceDir.replace(/\\/g, "/")};
-    internal;
-}`;
-  if (!confContent.includes("acdm-maintenance.html")) {
-    const updated = await fs.readFile(nginxConf, "utf-8");
-    const newContent = updated.replace(
-      /(\s*include\s+D:\/nginx\/conf\/sites\/\*\.conf;)/,
-      `${errorPageBlock}\n$1`
-    );
-    await fs.writeFile(nginxConf, newContent, "utf-8");
-  }
+  return {
+    hostname: domain.hostname,
+    nginxConfigPath: nginxConfig.filepath,
+    original: current,
+    proposed,
+    action,
+  };
 }
 
-async function regenerateMaintenanceMap(maintenanceDir: string) {
-  const configs = await prisma.maintenanceConfig.findMany({
-    where: { enabled: true },
-    include: { domain: true },
+export async function previewSiteMaintenance(
+  domainId: string,
+  siteEnabled: boolean
+): Promise<MaintenancePreview> {
+  const serverEnabled = await isServerMaintenanceEnabled();
+  return previewDomainMaintenanceState(domainId, { siteEnabled, serverEnabled });
+}
+
+export async function previewServerMaintenance(
+  enabled: boolean
+): Promise<MaintenancePreview[]> {
+  const domains = await prisma.domain.findMany({
+    orderBy: { hostname: "asc" },
   });
 
-  const serverWide = configs.find((c) => c.scope === "SERVER");
-  const siteConfigs = configs.filter(
-    (c) => c.scope === "SITE" && c.domain?.hostname
-  );
+  const previews: MaintenancePreview[] = [];
+  for (const domain of domains) {
+    const siteConfig = await getSiteMaintenanceConfig(domain.id);
+    const siteEnabled = siteConfig?.enabled ?? false;
 
-  let mapContent: string;
-
-  if (serverWide) {
-    mapContent = `map $host $acdm_maintenance {
-    default 1;
-}
-`;
-  } else if (siteConfigs.length > 0) {
-    const entries = siteConfigs
-      .map((c) => `    ${c.domain!.hostname} 1;`)
-      .join("\n");
-    mapContent = `map $host $acdm_maintenance {
-    default 0;
-${entries}
-}
-`;
-  } else {
-    mapContent = `map $host $acdm_maintenance {
-    default 0;
-}
-`;
+    try {
+      const preview = await previewDomainMaintenanceState(domain.id, {
+        siteEnabled,
+        serverEnabled: enabled,
+      });
+      previews.push(preview);
+    } catch {
+      // Domain has no nginx config — skip in preview list
+    }
   }
 
-  await fs.writeFile(
-    path.join(maintenanceDir, "acdm-map.conf"),
-    mapContent,
-    "utf-8"
+  return previews;
+}
+
+async function applyDomainMaintenanceSync(
+  domainId: string,
+  websiteMaintenanceConf: string,
+  rollback: NginxRollbackEntry[]
+): Promise<void> {
+  const domain = await prisma.domain.findUnique({ where: { id: domainId } });
+  if (!domain) return;
+
+  const nginxConfig = await resolveNginxConfigForDomain(domain);
+  if (!nginxConfig) {
+    throw new Error(`No nginx config found for ${domain.hostname}`);
+  }
+
+  const serverEnabled = await isServerMaintenanceEnabled();
+  const siteConfig = await getSiteMaintenanceConfig(domainId);
+  const wantMaintenance = await shouldDomainBeInMaintenance(
+    domainId,
+    serverEnabled,
+    siteConfig?.enabled
   );
+
+  const current = await readNginxContent(nginxConfig);
+  const isMaintenance = isMaintenanceNginxContent(current);
+
+  if (wantMaintenance && !isMaintenance) {
+    await backupNginxConfigFile(nginxConfig, "pre-maintenance");
+    const originalContent = current;
+    const newContent = applyMaintenanceToContent(
+      current,
+      websiteMaintenanceConf
+    );
+
+    rollback.push({ config: nginxConfig, previousContent: current });
+    await writeNginxConfigFile(nginxConfig, newContent);
+
+    await upsertSiteMaintenanceRecord(domainId, {
+      enabled: siteConfig?.enabled ?? false,
+      nginxConfigId: nginxConfig.id,
+      originalContent,
+      includeFilePath: websiteMaintenanceConf,
+    });
+  } else if (!wantMaintenance && isMaintenance) {
+    const originalContent = siteConfig?.originalContent;
+    if (!originalContent) {
+      throw new Error(
+        `Missing stored original config for ${domain.hostname} — cannot restore`
+      );
+    }
+
+    rollback.push({ config: nginxConfig, previousContent: current });
+    await writeNginxConfigFile(nginxConfig, originalContent);
+
+    await upsertSiteMaintenanceRecord(domainId, {
+      enabled: siteConfig?.enabled ?? false,
+      nginxConfigId: nginxConfig.id,
+      originalContent: null,
+      includeFilePath: null,
+    });
+  }
 }
 
 export async function setSiteMaintenance(
@@ -199,43 +352,38 @@ export async function setSiteMaintenance(
   const domain = await prisma.domain.findUnique({ where: { id: domainId } });
   if (!domain) throw new Error("Domain not found");
 
-  const maintenanceDir = await getMaintenanceDir();
-  await ensureNginxMaintenanceSetup(maintenanceDir);
-
-  const includeFilePath = path
-    .join(maintenanceDir, "sites", `${domain.hostname}.conf`)
-    .replace(/\\/g, "/");
-
-  const existing = await prisma.maintenanceConfig.findFirst({
-    where: { domainId, scope: "SITE" },
-  });
-
+  const existing = await getSiteMaintenanceConfig(domainId);
   if (existing) {
     await prisma.maintenanceConfig.update({
       where: { id: existing.id },
-      data: { enabled, includeFilePath },
+      data: { enabled },
     });
   } else {
     await prisma.maintenanceConfig.create({
-      data: {
-        scope: "SITE",
-        enabled,
-        domainId,
-        includeFilePath,
-      },
+      data: { scope: "SITE", domainId, enabled },
     });
   }
 
-  await regenerateMaintenanceMap(maintenanceDir);
+  const maintenanceDir = await getMaintenanceDir();
+  const { websiteMaintenanceConf } = await ensureMaintenanceSnippetFiles(
+    maintenanceDir
+  );
+
+  const rollback: NginxRollbackEntry[] = [];
+  await applyDomainMaintenanceSync(
+    domainId,
+    websiteMaintenanceConf,
+    rollback
+  );
 
   const test = await testNginxConfig();
   if (!test.passed) {
+    await rollbackNginxChanges(rollback);
     await prisma.maintenanceConfig.updateMany({
       where: { domainId, scope: "SITE" },
       data: { enabled: !enabled },
     });
-    await regenerateMaintenanceMap(maintenanceDir);
-    throw new Error(`Nginx test failed: ${test.output}`);
+    throw new Error(`Nginx test failed — rolled back: ${test.output}`);
   }
 
   if (options.autoReload) await reloadNginx();
@@ -252,9 +400,6 @@ export async function setServerMaintenance(
   enabled: boolean,
   options: { autoReload?: boolean } = {}
 ) {
-  const maintenanceDir = await getMaintenanceDir();
-  await ensureNginxMaintenanceSetup(maintenanceDir);
-
   const existing = await prisma.maintenanceConfig.findFirst({
     where: { scope: "SERVER" },
   });
@@ -269,17 +414,55 @@ export async function setServerMaintenance(
       data: {
         scope: "SERVER",
         enabled,
-        includeFilePath: path.join(maintenanceDir, "server-maintenance.conf"),
+        includeFilePath: path.join(
+          await getNginxMaintenanceDir(),
+          "global-maintenance.conf"
+        ),
       },
     });
   }
 
-  await regenerateMaintenanceMap(maintenanceDir);
+  const maintenanceDir = await getMaintenanceDir();
+  const { websiteMaintenanceConf } = await ensureMaintenanceSnippetFiles(
+    maintenanceDir
+  );
+
+  const domains = await prisma.domain.findMany();
+  const rollback: NginxRollbackEntry[] = [];
+
+  for (const domain of domains) {
+    await applyDomainMaintenanceSync(
+      domain.id,
+      websiteMaintenanceConf,
+      rollback
+    );
+  }
 
   const test = await testNginxConfig();
   if (!test.passed) {
-    throw new Error(`Nginx test failed: ${test.output}`);
+    await rollbackNginxChanges(rollback);
+    await prisma.maintenanceConfig.updateMany({
+      where: { scope: "SERVER" },
+      data: { enabled: !enabled },
+    });
+    throw new Error(`Nginx test failed — rolled back: ${test.output}`);
   }
+
+  await writeGlobalMaintenanceMarker(
+    enabled,
+    rollback.length > 0
+      ? rollback.length
+      : (
+          await Promise.all(
+            domains.map(async (d) => {
+              const cfg = await resolveNginxConfigForDomain(d);
+              if (!cfg) return false;
+              const content = await readNginxContent(cfg);
+              return isMaintenanceNginxContent(content);
+            })
+          )
+        ).filter(Boolean).length
+  );
 
   if (options.autoReload) await reloadNginx();
 
@@ -301,6 +484,7 @@ export async function getMaintenanceStatus() {
     }),
   ]);
 
+  const serverWideEnabled = serverConfig?.enabled ?? false;
   const enabledByDomain = new Map(
     configs
       .filter((c) => c.scope === "SITE" && c.domainId && c.enabled)
@@ -310,10 +494,11 @@ export async function getMaintenanceStatus() {
   return {
     page,
     configs,
-    serverWideEnabled: serverConfig?.enabled ?? false,
+    serverWideEnabled,
     domains: domains.map((d) => ({
       ...d,
-      maintenanceEnabled: enabledByDomain.has(d.id),
+      maintenanceEnabled:
+        serverWideEnabled || enabledByDomain.has(d.id),
     })),
   };
 }

@@ -3,15 +3,19 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Label, TextField } from "@heroui/react";
-import { Power, PowerOff } from "lucide-react";
+import { Eye, Power, PowerOff } from "lucide-react";
 import { Card } from "@heroui/react";
 import { FormTextarea } from "@/components/crud/form-fields";
 import { StatusBadge } from "@/components/ui/data-table";
+import { MaintenancePreviewDialog } from "@/components/maintenance/maintenance-preview-dialog";
 import {
   updateMaintenancePageAction,
   toggleSiteMaintenanceAction,
   toggleServerMaintenanceAction,
+  previewSiteMaintenanceAction,
+  previewServerMaintenanceAction,
 } from "@/actions/maintenance";
+import type { MaintenancePreview } from "@/lib/maintenance/service";
 
 type MaintenancePageData = {
   id: string;
@@ -21,26 +25,20 @@ type MaintenancePageData = {
   logoPath: string | null;
 } | null;
 
-type MaintenanceConfigRow = {
-  id: string;
-  scope: string;
-  enabled: boolean;
-  domain: { id: string; hostname: string } | null;
-  application: { id: string; name: string } | null;
-};
-
 interface MaintenanceManagerProps {
   page: MaintenancePageData;
-  configs: MaintenanceConfigRow[];
   domains: { id: string; hostname: string; maintenanceEnabled: boolean }[];
   serverWideEnabled: boolean;
   isSuperAdmin: boolean;
   readOnly?: boolean;
 }
 
+type PendingAction =
+  | { type: "site"; domainId: string; hostname: string; enabled: boolean }
+  | { type: "server"; enabled: boolean };
+
 export function MaintenanceManager({
   page,
-  configs,
   domains,
   serverWideEnabled,
   isSuperAdmin,
@@ -53,6 +51,10 @@ export function MaintenanceManager({
   const [expectedReturn, setExpectedReturn] = useState(page?.expectedReturn ?? "");
   const [logoPath, setLogoPath] = useState(page?.logoPath ?? "");
   const [message, setMessage] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewTitle, setPreviewTitle] = useState("");
+  const [previews, setPreviews] = useState<MaintenancePreview[]>([]);
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
 
   function savePage() {
     startTransition(async () => {
@@ -62,22 +64,61 @@ export function MaintenanceManager({
         expectedReturn,
         logoPath,
       });
-      setMessage(result.error ?? "Page content saved");
+      setMessage(result.error ?? "Page content saved to index.html");
       router.refresh();
     });
   }
 
-  function toggleSite(domainId: string, enabled: boolean) {
+  function openSitePreview(domainId: string, hostname: string, enabled: boolean) {
     startTransition(async () => {
-      const result = await toggleSiteMaintenanceAction(domainId, enabled);
-      setMessage(result.error ?? result.output ?? "Updated");
-      router.refresh();
+      const result = await previewSiteMaintenanceAction(domainId, enabled);
+      if (result.error) {
+        setMessage(result.error);
+        return;
+      }
+      setPendingAction({ type: "site", domainId, hostname, enabled });
+      setPreviewTitle(
+        `${enabled ? "Enable" : "Disable"} maintenance — ${hostname}`
+      );
+      setPreviews(result.preview ? [result.preview] : []);
+      setPreviewOpen(true);
     });
   }
 
-  function toggleServer(enabled: boolean) {
+  function openServerPreview(enabled: boolean) {
     startTransition(async () => {
-      const result = await toggleServerMaintenanceAction(enabled);
+      const result = await previewServerMaintenanceAction(enabled);
+      if (result.error) {
+        setMessage(result.error);
+        return;
+      }
+      setPendingAction({ type: "server", enabled });
+      setPreviewTitle(
+        enabled
+          ? "Enable server-wide maintenance"
+          : "Disable server-wide maintenance"
+      );
+      setPreviews(result.previews ?? []);
+      setPreviewOpen(true);
+    });
+  }
+
+  function applyPendingAction() {
+    if (!pendingAction) return;
+
+    startTransition(async () => {
+      let result;
+      if (pendingAction.type === "site") {
+        result = await toggleSiteMaintenanceAction(
+          pendingAction.domainId,
+          pendingAction.enabled
+        );
+      } else {
+        result = await toggleServerMaintenanceAction(pendingAction.enabled);
+      }
+
+      setPreviewOpen(false);
+      setPendingAction(null);
       setMessage(result.error ?? result.output ?? "Updated");
       router.refresh();
     });
@@ -95,7 +136,8 @@ export function MaintenanceManager({
         <Card.Header>
           <Card.Title className="text-white">Maintenance Page Content</Card.Title>
           <Card.Description>
-            Auto-generated to D:\server-config\maintenance\page.html
+            Served from D:\server-config\maintenance\index.html via nginx static
+            root
           </Card.Description>
         </Card.Header>
         <Card.Content className="space-y-4">
@@ -131,18 +173,28 @@ export function MaintenanceManager({
           <Card.Header>
             <Card.Title className="text-white">Server-Wide Maintenance</Card.Title>
             <Card.Description>
-              Puts all sites into maintenance mode via nginx map
+              Swaps every site&apos;s location / block to the maintenance include.
+              Does not modify proxy-common.conf or ssl-common.conf.
             </Card.Description>
           </Card.Header>
           <Card.Content>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <StatusBadge
                 status={serverWideEnabled ? "ENABLED" : "DISABLED"}
                 variant={serverWideEnabled ? "warning" : "default"}
               />
               <Button
+                variant="secondary"
+                onPress={() => openServerPreview(!serverWideEnabled)}
+                isDisabled={isPending}
+                className="gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                Preview
+              </Button>
+              <Button
                 variant={serverWideEnabled ? "danger" : "primary"}
-                onPress={() => toggleServer(!serverWideEnabled)}
+                onPress={() => openServerPreview(!serverWideEnabled)}
                 isDisabled={isPending}
                 className="gap-2"
               >
@@ -165,7 +217,8 @@ export function MaintenanceManager({
         <Card.Header>
           <Card.Title className="text-white">Per-Site Maintenance</Card.Title>
           <Card.Description>
-            Uses generated nginx map — original site configs are not modified
+            Replaces location / with include of website-maintenance.conf. Original
+            config is backed up before apply.
           </Card.Description>
         </Card.Header>
         <Card.Content>
@@ -173,23 +226,39 @@ export function MaintenanceManager({
             {domains.map((d) => (
               <div
                 key={d.id}
-                className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-800/30"
+                className="flex flex-wrap items-center justify-between gap-2 py-2 px-3 rounded-lg bg-slate-800/30"
               >
                 <span className="font-mono text-sm">{d.hostname}</span>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <StatusBadge
                     status={d.maintenanceEnabled ? "ON" : "OFF"}
                     variant={d.maintenanceEnabled ? "warning" : "default"}
                   />
                   {!readOnly && (
-                    <Button
-                      size="sm"
-                      variant={d.maintenanceEnabled ? "ghost" : "secondary"}
-                      isDisabled={isPending}
-                      onPress={() => toggleSite(d.id, !d.maintenanceEnabled)}
-                    >
-                      {d.maintenanceEnabled ? "Disable" : "Enable"}
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        isDisabled={isPending}
+                        onPress={() =>
+                          openSitePreview(d.id, d.hostname, !d.maintenanceEnabled)
+                        }
+                        className="gap-1"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        Preview
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={d.maintenanceEnabled ? "ghost" : "secondary"}
+                        isDisabled={isPending}
+                        onPress={() =>
+                          openSitePreview(d.id, d.hostname, !d.maintenanceEnabled)
+                        }
+                      >
+                        {d.maintenanceEnabled ? "Disable" : "Enable"}
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
@@ -201,11 +270,19 @@ export function MaintenanceManager({
         </Card.Content>
       </Card>
 
-      {configs.length > 0 && (
-        <p className="text-xs text-slate-600">
-          {configs.filter((c) => c.enabled).length} active maintenance config(s)
-        </p>
-      )}
+      <MaintenancePreviewDialog
+        isOpen={previewOpen}
+        onClose={() => {
+          if (!isPending) {
+            setPreviewOpen(false);
+            setPendingAction(null);
+          }
+        }}
+        onApply={applyPendingAction}
+        title={previewTitle}
+        previews={previews}
+        isLoading={isPending}
+      />
     </div>
   );
 }

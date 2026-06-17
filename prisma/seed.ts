@@ -10,8 +10,256 @@ const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const PROJECTS_JSON = path.join(process.cwd(), "projects.json");
-const PORTS_JSON = "D:\\under-construction\\ports.json";
+const PROJECTS_JSON = [
+  {
+    "name": "Amrik Chhauni — Hub",
+    "subdomain": "Primary Domain",
+    "url": "https://amrikchhauni.in",
+    "description": "Central landing page listing all deployed projects on this development domain.",
+    "category": "Hub",
+    "remark": "Main entry point",
+    "note": "Testing & demo only",
+    "status": "Live",
+    "featured": true,
+    "port": 443
+  },
+  {
+    "name": "Query Cart",
+    "subdomain": "qc",
+    "url": "https://qc.amrikchhauni.in",
+    "description": "Negotiation-first marketplace for modern commerce teams.",
+    "category": "Pavittar",
+    "remark": "",
+    "note": "Client project",
+    "status": "Live",
+    "featured": false,
+    "port": 4800
+  },
+  {
+    "name": "Pavittar Portfolio",
+    "subdomain": "ps",
+    "url": "https://ps.amrikchhauni.in",
+    "description": "Pavittar's Resume / Portfolio site.",
+    "category": "Hobby",
+    "remark": "",
+    "note": "",
+    "status": "Live",
+    "featured": false,
+    "port": 5001
+  },
+  {
+    "name": "SCS",
+    "subdomain": "scs",
+    "url": "https://scs.amrikchhauni.in",
+    "description": "Smart Computer Solutions - A small business/shop website.",
+    "category": "Pavittar",
+    "remark": "",
+    "note": "",
+    "status": "Planned",
+    "featured": false,
+    "port": 5002
+  },
+  {
+    "name": "Development Sandbox",
+    "subdomain": "ds",
+    "url": "https://ds.amrikchhauni.in",
+    "description": "Experimental builds, prototypes, and work-in-progress features.",
+    "category": "Development",
+    "remark": "May be unstable",
+    "note": "Not for production use",
+    "status": "Beta",
+    "featured": false,
+    "port": 9090
+  },
+  {
+    "name": "Under Construction Sandbox",
+    "subdomain": "ucmd",
+    "url": "https://ucmd.amrikchhauni.in",
+    "description": "Under Construction Management Dashboard",
+    "category": "Development",
+    "remark": "Only for internal use",
+    "note": "localhost port management",
+    "status": "Live",
+    "featured": false,
+    "port": 9091
+  },
+  {
+    "name": "GSMS",
+    "subdomain": "gsms",
+    "url": "https://gsms.amrikchhauni.in",
+    "description": "Gurdwara Sahib Management System",
+    "category": "Hobby",
+    "remark": "",
+    "note": "",
+    "status": "UnderConstruction",
+    "featured": false,
+    "port": 5005
+  },
+  {
+    "name": "ID Card Generator",
+    "subdomain": "idcardgenerator",
+    "url": "https://idcardgenerator.amrikchhauni.in",
+    "description": "Generate downloadable ID cards from custom templates.",
+    "category": "Pavittar",
+    "remark": "Malkiat Singh Saibhang",
+    "note": "Asees DRMS Project",
+    "status": "Live",
+    "featured": false,
+    "port": 4900
+  },
+  {
+    "name": "WA Dashboard",
+    "subdomain": "wa",
+    "url": "https://wa.amrikchhauni.in",
+    "description": "WhatsApp-related utilities of Sanjeev's.",
+    "category": "Sanjeev",
+    "remark": "Office related",
+    "note": "",
+    "status": "Live",
+    "featured": false,
+    "port": 6002
+  },
+  {
+    "name": "Taste of Panjab",
+    "subdomain": "tasteofpanjab",
+    "url": "https://tasteofpanjab.amrikchhauni.in",
+    "description": "Restaurant showcase site.",
+    "category": "Amrik",
+    "remark": ".Net + Angular Project",
+    "note": "",
+    "status": "Live",
+    "featured": true,
+    "port": 4001
+  },
+  {
+    "name": "Smart Kharcha AI",
+    "subdomain": "kharcha",
+    "url": "https://kharcha.amrikchhauni.in",
+    "description": "Production-ready financial management web app",
+    "category": "Hobby",
+    "remark": "",
+    "note": "",
+    "status": "UnderConstruction",
+    "featured": false,
+    "port": 5003
+  },
+  {
+    "name": "Divine Dhun",
+    "subdomain": "dd",
+    "url": "https://dd.amrikchhauni.in",
+    "description": "Divine Dhun -Sacred Music Streaming.",
+    "category": "Hobby",
+    "remark": "",
+    "note": "",
+    "status": "Live",
+    "featured": false,
+    "port": 5004
+  },
+  {
+    "name": "Score",
+    "subdomain": "score",
+    "url": "https://score.amrikchhauni.in",
+    "description": "Score",
+    "category": "Amrik",
+    "remark": ".Net",
+    "note": "",
+    "status": "UnderConstruction",
+    "featured": false,
+    "port": 4002
+  },
+  {
+    "name": "Umpiring",
+    "subdomain": "umpiring",
+    "url": "https://umpiring.amrikchhauni.in",
+    "description": "Umpiring",
+    "category": "Amrik",
+    "remark": ".Net",
+    "note": "",
+    "status": "UnderConstruction",
+    "featured": false,
+    "port": 4003
+  },
+  {
+    "name": "E-Jagriti Sync",
+    "subdomain": "ejdata",
+    "url": "https://ejdata.amrikchhauni.in",
+    "description": "E-Jagriti Data Sync Service",
+    "category": "Sanjeev",
+    "remark": "",
+    "note": "",
+    "status": "UnderConstruction",
+    "featured": false,
+    "port": 6003
+  },
+  {
+    "name": "Court Room Automation",
+    "subdomain": "courtroomautomation",
+    "url": "https://courtroomautomation.amrikchhauni.in",
+    "description": "E-Jagriti Court Room Automation - Backend",
+    "category": "Sanjeev",
+    "remark": "Python",
+    "note": "used in ejdata app",
+    "status": "Live",
+    "featured": false,
+    "port": 6004
+  },
+  {
+    "name": "Punjab Sports Hub",
+    "subdomain": "psh",
+    "url": "https://psh.amrikchhauni.in",
+    "description": "Punjab Sports Hub - ERP System",
+    "category": "Hobby",
+    "remark": "",
+    "note": "",
+    "status": "Live",
+    "featured": false,
+    "port": 5006
+  },
+  {
+    "name": "Aanchal Amruttulya Franchise",
+    "subdomain": "aaph",
+    "url": "https://aaph.amrikchhauni.in",
+    "description": "Aanchal Amruttulya Franchise - Start Your Own Tea & Pizza Franchise Business",
+    "category": "Pavittar",
+    "remark": "",
+    "note": "Aranpreet Project",
+    "status": "Live",
+    "featured": false,
+    "port": 5006
+  },
+  {
+    "name": "SCDRC",
+    "subdomain": "scdrc",
+    "url": "https://scdrc.amrikchhauni.in",
+    "description": "New - SCDRC website",
+    "category": "Sanjeev",
+    "remark": "",
+    "note": "",
+    "status": "UnderConstruction",
+    "featured": false,
+    "port": 6005
+  },
+  {
+    "name": "E-Briefly",
+    "subdomain": "ebriefly",
+    "url": "https://ebriefly.amrikchhauni.in",
+    "description": "E-Briefly website",
+    "category": "Sanjeev",
+    "remark": "",
+    "note": "",
+    "status": "Live",
+    "featured": false,
+    "port": 6001
+  }
+];
+const PORTS_JSON = [
+  {
+    "port": 4003,
+    "title": "Umpiring",
+    "running": true
+  }
+];
+
 const NGINX_SITES = "D:\\nginx\\conf\\sites";
 
 const IDEA_SOURCES = [
@@ -293,22 +541,7 @@ async function seedMaintenancePage() {
 }
 
 async function seedProjects() {
-  console.log("Seeding applications from projects.json...");
-  const raw = await fs.readFile(PROJECTS_JSON, "utf-8");
-  const { projects } = JSON.parse(raw) as {
-    projects: Array<{
-      name: string;
-      subdomain: string;
-      url: string;
-      description: string;
-      category: string;
-      remark: string;
-      note: string;
-      status: string;
-      featured: boolean;
-      port: number;
-    }>;
-  };
+  console.log("Seeding applications from projects array...");
 
   const ideaSources = await prisma.ideaSource.findMany();
   const technologies = await prisma.technology.findMany();
@@ -318,7 +551,7 @@ async function seedProjects() {
     where: { username: superAdminUsername },
   });
 
-  for (const project of projects) {
+  for (const project of PROJECTS_JSON) {
     const ideaSource = ideaSources.find((s) => s.name === project.category);
     const techName = inferTechnology(project.category, project.remark);
     const technology = technologies.find((t) => t.name === techName);
@@ -393,12 +626,7 @@ async function seedProjects() {
 async function seedUnderConstructionPorts() {
   console.log("Seeding under-construction ports...");
   try {
-    const raw = await fs.readFile(PORTS_JSON, "utf-8");
-    const { sites } = JSON.parse(raw) as {
-      sites: Array<{ port: number; title: string; running: boolean }>;
-    };
-
-    for (const site of sites) {
+    for (const site of PORTS_JSON) {
       await prisma.port.upsert({
         where: { number: site.port },
         update: { status: "UNDER_CONSTRUCTION" },

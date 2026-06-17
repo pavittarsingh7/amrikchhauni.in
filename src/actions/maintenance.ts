@@ -11,12 +11,22 @@ import {
   updateMaintenancePage,
   setSiteMaintenance,
   setServerMaintenance,
+  previewSiteMaintenance,
+  previewServerMaintenance,
+  type MaintenancePreview,
 } from "@/lib/maintenance/service";
 
 export type InfraActionState = {
   success?: boolean;
   error?: string;
   output?: string;
+};
+
+export type MaintenancePreviewState = {
+  success?: boolean;
+  error?: string;
+  previews?: MaintenancePreview[];
+  preview?: MaintenancePreview;
 };
 
 async function canAutoReload() {
@@ -46,6 +56,31 @@ export async function updateMaintenancePageAction(input: {
     return { success: true };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Update failed" };
+  }
+}
+
+export async function previewSiteMaintenanceAction(
+  domainId: string,
+  enabled: boolean
+): Promise<MaintenancePreviewState> {
+  try {
+    await requireWriteAccess();
+    const preview = await previewSiteMaintenance(domainId, enabled);
+    return { success: true, preview };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Preview failed" };
+  }
+}
+
+export async function previewServerMaintenanceAction(
+  enabled: boolean
+): Promise<MaintenancePreviewState> {
+  try {
+    await requireSuperAdmin();
+    const previews = await previewServerMaintenance(enabled);
+    return { success: true, previews };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Preview failed" };
   }
 }
 

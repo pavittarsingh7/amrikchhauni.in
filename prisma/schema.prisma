@@ -372,7 +372,9 @@ model MaintenanceConfig {
   enabled         Boolean          @default(false)
   domainId        String?          @map("domain_id")
   applicationId   String?          @map("application_id")
+  nginxConfigId   String?          @map("nginx_config_id")
   includeFilePath String?          @map("include_file_path")
+  originalContent String?          @db.Text @map("original_content")
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
 
@@ -381,6 +383,7 @@ model MaintenanceConfig {
 
   @@index([domainId])
   @@index([applicationId])
+  @@index([nginxConfigId])
   @@map("maintenance_configs")
 }
 
