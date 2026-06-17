@@ -223,7 +223,7 @@ export function AuditLogsManager({
             {detail.before != null && (
               <div>
                 <p className="text-slate-500 text-xs uppercase mb-1">Before</p>
-                <pre className="bg-slate-950 p-3 rounded-lg overflow-auto max-h-48 text-xs text-slate-300">
+                <pre className="bg-slate-100 dark:bg-slate-950 p-3 rounded-lg overflow-auto max-h-48 text-xs text-slate-700 dark:text-slate-300">
                   {JSON.stringify(detail.before, null, 2)}
                 </pre>
               </div>
@@ -231,7 +231,7 @@ export function AuditLogsManager({
             {detail.after != null && (
               <div>
                 <p className="text-slate-500 text-xs uppercase mb-1">After</p>
-                <pre className="bg-slate-950 p-3 rounded-lg overflow-auto max-h-48 text-xs text-slate-300">
+                <pre className="bg-slate-100 dark:bg-slate-950 p-3 rounded-lg overflow-auto max-h-48 text-xs text-slate-700 dark:text-slate-300">
                   {JSON.stringify(detail.after, null, 2)}
                 </pre>
               </div>

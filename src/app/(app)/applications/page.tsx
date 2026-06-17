@@ -59,9 +59,9 @@ export default async function ApplicationsPage() {
       </div>
 
       {pendingSuggestions.length > 0 && (
-        <Card className="bg-slate-900 border border-slate-800 mb-8">
+        <Card className="acdm-card mb-8">
           <Card.Header>
-            <Card.Title className="text-white">
+            <Card.Title className="acdm-card-title">
               Pending Discovery Suggestions
             </Card.Title>
             <Card.Description>
@@ -83,9 +83,9 @@ export default async function ApplicationsPage() {
         </Card>
       )}
 
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">
+          <Card.Title className="acdm-card-title">
             Registered Applications ({applications.length})
           </Card.Title>
         </Card.Header>

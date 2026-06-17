@@ -194,7 +194,7 @@ export function Pm2Manager({
       />
 
       {logs && (
-        <div className="mt-4 p-4 bg-slate-950 border border-slate-800 rounded-lg">
+        <div className="mt-4 p-4 bg-slate-100 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 rounded-lg">
           <div className="flex justify-between mb-2">
             <p className="text-sm text-slate-400">Logs: {logsName}</p>
             <Button size="sm" variant="ghost" onPress={() => setLogs(null)}>

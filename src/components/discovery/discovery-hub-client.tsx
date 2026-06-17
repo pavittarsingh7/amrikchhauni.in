@@ -67,9 +67,9 @@ export function DiscoveryHubClient({ readOnly = false }: DiscoveryHubClientProps
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {SCANNERS.map((scanner) => (
-        <Card key={scanner.key} className="bg-slate-900 border border-slate-800">
+        <Card key={scanner.key} className="acdm-card">
           <Card.Header>
-            <Card.Title className="text-white text-base">{scanner.title}</Card.Title>
+            <Card.Title className="acdm-card-title text-base">{scanner.title}</Card.Title>
             <Card.Description className="text-sm">
               {scanner.description}
             </Card.Description>

@@ -15,9 +15,9 @@ export default async function ServersPage() {
         title="Servers"
         description="Server registry for multi-server support"
       />
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">Registered Servers ({servers.length})</Card.Title>
+          <Card.Title className="acdm-card-title">Registered Servers ({servers.length})</Card.Title>
           <Card.Description>
             Mark one server as current. Remote execution is planned for future releases.
           </Card.Description>

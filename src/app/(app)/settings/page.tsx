@@ -111,9 +111,9 @@ export default function SettingsPage() {
 
         {categories.map((category) => (
           <Tabs.Panel key={category} id={category}>
-            <Card className="bg-slate-900 border border-slate-800 mt-4">
+            <Card className="acdm-card mt-4">
               <Card.Header>
-                <Card.Title className="text-lg font-semibold text-white">
+                <Card.Title className="text-lg acdm-card-title">
                   {CATEGORY_LABELS[category] ?? category}
                 </Card.Title>
               </Card.Header>

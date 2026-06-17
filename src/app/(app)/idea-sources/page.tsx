@@ -12,9 +12,9 @@ export default async function IdeaSourcesPage() {
   return (
     <div className="p-6">
       <PageHeader title="Idea Sources" description="Track project origin and ownership" />
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">Idea Sources ({items.length})</Card.Title>
+          <Card.Title className="acdm-card-title">Idea Sources ({items.length})</Card.Title>
         </Card.Header>
         <Card.Content>
           <IdeaSourcesManager items={items} readOnly={readOnly} />

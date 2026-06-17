@@ -1,7 +1,7 @@
 import { DM_Sans, Instrument_Sans } from "next/font/google";
 import type { Metadata } from "next";
 import "../hub.css";
-import { HubThemeInit } from "@/components/hub/hub-theme";
+import { HubAnimationFallback } from "@/components/hub/hub-animation-fallback";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -26,17 +26,11 @@ export default function HubLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `(function(){try{var s=localStorage.getItem('hub-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(!s&&d))document.documentElement.classList.add('dark');else document.documentElement.classList.remove('dark');}catch(e){}})();`,
-        }}
-      />
-      <div
-        className={`${dmSans.variable} ${instrumentSans.variable} min-h-screen bg-slate-50 font-sans text-slate-800 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100`}
-        style={{ fontFamily: "var(--font-dm-sans), ui-sans-serif, system-ui" }}
-      >
-      <HubThemeInit />
+    <div
+      className={`${dmSans.variable} ${instrumentSans.variable} min-h-screen bg-slate-50 font-sans text-slate-800 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100`}
+      style={{ fontFamily: "var(--font-dm-sans), ui-sans-serif, system-ui" }}
+    >
+      <HubAnimationFallback />
       <div
         className="pointer-events-none fixed inset-0 overflow-hidden"
         aria-hidden="true"
@@ -48,7 +42,6 @@ export default function HubLayout({
       <div className="relative mx-auto flex min-h-screen flex-col px-4 pb-12 pt-6 sm:px-6 lg:px-8">
         {children}
       </div>
-      </div>
-    </>
+    </div>
   );
 }

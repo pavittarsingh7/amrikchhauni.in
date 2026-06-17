@@ -17,9 +17,9 @@ export default async function SslPage() {
         description="Discover, renew, and request certificates via Win-ACME"
       />
 
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">
+          <Card.Title className="acdm-card-title">
             Certificates ({certificates.length})
           </Card.Title>
           <Card.Description>

@@ -36,9 +36,9 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
         description="Platform activity and configuration changes"
       />
 
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">Activity Log</Card.Title>
+          <Card.Title className="acdm-card-title">Activity Log</Card.Title>
           <Card.Description>
             Every mutation is recorded with user, timestamp, and before/after state.
           </Card.Description>

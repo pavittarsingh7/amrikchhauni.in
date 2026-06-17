@@ -30,6 +30,7 @@ import {
 import { useState } from "react";
 import { Button } from "@heroui/react";
 import { logoutAction } from "@/actions/auth";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { getNavForRole } from "@/lib/navigation";
 import { ROLE_LABELS } from "@/lib/auth/roles";
 import type { UserRole } from "@/lib/db/types";
@@ -68,17 +69,17 @@ export function Sidebar({ user }: SidebarProps) {
 
   return (
     <aside
-      className={`flex flex-col h-screen bg-slate-900 border-r border-slate-800 transition-all duration-200 ${
+      className={`flex flex-col h-screen border-r transition-all duration-200 bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 ${
         collapsed ? "w-16" : "w-64"
       }`}
     >
-      <div className="flex items-center justify-between p-4 border-b border-slate-800">
+      <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
         {!collapsed && (
           <div>
             <p className="text-xs uppercase tracking-widest text-blue-400 font-semibold">
               ACDM
             </p>
-            <p className="text-sm text-slate-400 truncate">Deployment Manager</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 truncate">Deployment Manager</p>
           </div>
         )}
         <Button
@@ -108,8 +109,8 @@ export function Sidebar({ user }: SidebarProps) {
               href={item.href}
               className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg text-sm transition-colors ${
                 isActive
-                  ? "bg-blue-600/20 text-blue-400"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                  ? "bg-blue-600/15 text-blue-600 dark:bg-blue-600/20 dark:text-blue-400"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               }`}
               title={collapsed ? item.label : undefined}
             >
@@ -120,10 +121,10 @@ export function Sidebar({ user }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-800">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800">
         {!collapsed && (
           <div className="mb-3">
-            <p className="text-sm font-medium text-white truncate">
+            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
               {user.username}
             </p>
             <p className="text-xs text-slate-500">
@@ -131,12 +132,18 @@ export function Sidebar({ user }: SidebarProps) {
             </p>
           </div>
         )}
+        <div className="mb-3 flex items-center gap-2">
+          <ThemeToggle />
+          {!collapsed && (
+            <span className="text-xs text-slate-500">Theme</span>
+          )}
+        </div>
         <form action={logoutAction}>
           <Button
             type="submit"
             variant="ghost"
             size="sm"
-            className="w-full justify-start text-slate-400"
+            className="w-full justify-start text-slate-600 dark:text-slate-400"
           >
             <LogOut className="w-4 h-4" />
             {!collapsed && <span className="ml-2">Sign Out</span>}

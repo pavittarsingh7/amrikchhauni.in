@@ -1,11 +1,17 @@
+"use client";
+
 import Link from "next/link";
-import { HubThemeToggle } from "./hub-theme";
+import { useRouter } from "next/navigation";
+import { Button } from "@heroui/react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface HubHeaderProps {
   view: "cards" | "table";
 }
 
 export function HubHeader({ view }: HubHeaderProps) {
+  const router = useRouter();
+
   return (
     <header className="mb-10 flex items-center justify-between opacity-0-start animate-fade-up">
       <Link href="/" className="group flex items-center gap-3">
@@ -22,28 +28,22 @@ export function HubHeader({ view }: HubHeaderProps) {
         </div>
       </Link>
       <div className="flex items-center gap-2 sm:gap-3">
-        {view === "cards" ? (
-          <Link
-            href="/table"
-            className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2.5 text-sm font-medium text-slate-600 shadow-sm backdrop-blur transition-all duration-300 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:text-indigo-400"
-          >
-            Table view
-          </Link>
-        ) : (
-          <Link
-            href="/"
-            className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2.5 text-sm font-medium text-slate-600 shadow-sm backdrop-blur transition-all duration-300 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:text-indigo-400"
-          >
-            Card view
-          </Link>
-        )}
-        <Link
-          href="/login"
-          className="hidden sm:inline-flex rounded-xl border border-slate-200 bg-white/80 px-3 py-2.5 text-sm font-medium text-slate-600 shadow-sm backdrop-blur transition-all duration-300 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-indigo-500 dark:hover:text-indigo-400"
+        <Button
+          variant="secondary"
+          size="sm"
+          onPress={() => router.push(view === "cards" ? "/table" : "/")}
+        >
+          {view === "cards" ? "Table view" : "Card view"}
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          className="hidden sm:inline-flex"
+          onPress={() => router.push("/login")}
         >
           Admin
-        </Link>
-        <HubThemeToggle />
+        </Button>
+        <ThemeToggle className="rounded-xl" />
       </div>
     </header>
   );

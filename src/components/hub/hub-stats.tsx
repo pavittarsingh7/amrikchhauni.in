@@ -16,7 +16,9 @@ export function HubStatsBar({ stats }: { stats: HubStats }) {
           key={item.label}
           className="rounded-lg bg-white/80 px-3 py-1.5 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-900/80 dark:ring-slate-800"
         >
-          <strong className="text-slate-800 dark:text-slate-200">{item.value}</strong>{" "}
+          <strong className="text-slate-800 dark:text-slate-200">
+            {item.value}
+          </strong>{" "}
           {item.label}
         </span>
       ))}

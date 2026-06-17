@@ -132,9 +132,9 @@ export function MaintenanceManager({
         </p>
       )}
 
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">Maintenance Page Content</Card.Title>
+          <Card.Title className="acdm-card-title">Maintenance Page Content</Card.Title>
           <Card.Description>
             Served from D:\server-config\maintenance\index.html via nginx static
             root
@@ -142,7 +142,7 @@ export function MaintenanceManager({
         </Card.Header>
         <Card.Content className="space-y-4">
           <TextField value={title} onChange={setTitle} isDisabled={readOnly}>
-            <Label>Title</Label>
+            <Label className="text-slate-300">Title</Label>
             <Input />
           </TextField>
           <FormTextarea
@@ -153,11 +153,11 @@ export function MaintenanceManager({
             disabled={readOnly}
           />
           <TextField value={expectedReturn} onChange={setExpectedReturn} isDisabled={readOnly}>
-            <Label>Expected Return</Label>
+            <Label className="text-slate-300">Expected Return</Label>
             <Input placeholder="Shortly / 2:00 PM IST" />
           </TextField>
           <TextField value={logoPath} onChange={setLogoPath} isDisabled={readOnly}>
-            <Label>Logo URL</Label>
+            <Label className="text-slate-300">Logo URL</Label>
             <Input placeholder="https://..." />
           </TextField>
           {!readOnly && (
@@ -169,9 +169,9 @@ export function MaintenanceManager({
       </Card>
 
       {isSuperAdmin && (
-        <Card className="bg-slate-900 border border-slate-800">
+        <Card className="acdm-card">
           <Card.Header>
-            <Card.Title className="text-white">Server-Wide Maintenance</Card.Title>
+            <Card.Title className="acdm-card-title">Server-Wide Maintenance</Card.Title>
             <Card.Description>
               Swaps every site&apos;s location / block to the maintenance include.
               Does not modify proxy-common.conf or ssl-common.conf.
@@ -213,9 +213,9 @@ export function MaintenanceManager({
         </Card>
       )}
 
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">Per-Site Maintenance</Card.Title>
+          <Card.Title className="acdm-card-title">Per-Site Maintenance</Card.Title>
           <Card.Description>
             Replaces location / with include of website-maintenance.conf. Original
             config is backed up before apply.
@@ -226,7 +226,7 @@ export function MaintenanceManager({
             {domains.map((d) => (
               <div
                 key={d.id}
-                className="flex flex-wrap items-center justify-between gap-2 py-2 px-3 rounded-lg bg-slate-800/30"
+                className="flex flex-wrap items-center justify-between gap-2 py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-800/30"
               >
                 <span className="font-mono text-sm">{d.hostname}</span>
                 <div className="flex items-center gap-2">

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "@heroui/styles/css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-acdm-primary: #0066cc;
   --color-acdm-secondary: #1a1a2e;
@@ -10,7 +12,75 @@
 }
 
 body {
-  @apply bg-slate-950 text-slate-100 antialiased;
+  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+}
+
+@layer components {
+  .acdm-card {
+    @apply bg-white border border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800;
+  }
+
+  .acdm-card-title {
+    @apply text-slate-900 dark:text-white font-semibold;
+  }
+
+  .acdm-card-desc {
+    @apply text-slate-500 dark:text-slate-400;
+  }
+
+  .acdm-table-wrap {
+    @apply overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800;
+  }
+
+  .acdm-table {
+    @apply w-full text-sm;
+  }
+
+  .acdm-table-head {
+    @apply border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50;
+  }
+
+  .acdm-table-head-cell {
+    @apply text-left px-4 py-3 text-xs uppercase tracking-wider text-slate-500 font-medium dark:text-slate-400;
+  }
+
+  .acdm-table-row {
+    @apply border-b border-slate-200/80 hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-900/30 transition-colors;
+  }
+
+  .acdm-table-cell {
+    @apply px-4 py-3 text-slate-700 dark:text-slate-300;
+  }
+
+  .acdm-input {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100;
+  }
+
+  .acdm-hub-surface {
+    @apply border border-slate-200/80 bg-white shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60;
+  }
+
+  /* HeroUI surfaces in light mode */
+  html:not(.dark) [data-slot="input-wrapper"],
+  html:not(.dark) [data-slot="input"] {
+    @apply bg-white text-slate-900;
+  }
+}
+
+/* HeroUI form labels — readable in light and dark */
+[data-slot="label"],
+label[data-slot="label"] {
+  @apply text-slate-600 dark:text-slate-300;
+}
+
+/* HeroUI descriptions */
+[data-slot="description"] {
+  @apply text-slate-500 dark:text-slate-400;
+}
+
+/* HeroUI inputs */
+[data-slot="input"] {
+  @apply text-slate-900 dark:text-slate-100;
 }
 
 /* HeroUI modal overlay portals — ensure above app shell (sidebar z-10) */

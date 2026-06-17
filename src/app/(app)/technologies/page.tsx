@@ -12,9 +12,9 @@ export default async function TechnologiesPage() {
   return (
     <div className="p-6">
       <PageHeader title="Technologies" description="Technology stack master data" />
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">Technologies ({items.length})</Card.Title>
+          <Card.Title className="acdm-card-title">Technologies ({items.length})</Card.Title>
         </Card.Header>
         <Card.Content>
           <TechnologiesManager items={items} readOnly={readOnly} />

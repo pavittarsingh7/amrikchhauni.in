@@ -28,9 +28,9 @@ export default async function PortsPage() {
         <StatCard label="Reserved" value={stats.reserved} />
       </div>
 
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">
+          <Card.Title className="acdm-card-title">
             Port Registry ({ports.length})
           </Card.Title>
         </Card.Header>

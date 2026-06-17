@@ -12,9 +12,9 @@ export default async function ClientsPage() {
   return (
     <div className="p-6">
       <PageHeader title="Clients" description="Manage client records linked to applications" />
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">Clients ({clients.length})</Card.Title>
+          <Card.Title className="acdm-card-title">Clients ({clients.length})</Card.Title>
         </Card.Header>
         <Card.Content>
           <ClientsManager clients={clients} readOnly={readOnly} />

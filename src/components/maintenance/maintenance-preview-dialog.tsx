@@ -30,7 +30,7 @@ function ConfigBlock({
       >
         {label}
       </p>
-      <pre className="max-h-64 overflow-auto rounded-lg border border-slate-700 bg-slate-950 p-3 text-xs leading-relaxed text-slate-300 whitespace-pre-wrap font-mono">
+      <pre className="max-h-64 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-relaxed text-slate-700 whitespace-pre-wrap font-mono dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
         {content}
       </pre>
     </div>
@@ -58,10 +58,10 @@ export function MaintenancePreviewDialog({
       isDismissable={!isLoading}
     >
       <Modal.Container placement="center" size="lg" scroll="inside">
-        <Modal.Dialog className="bg-slate-900 border border-slate-700 text-slate-100 w-full max-w-4xl">
+        <Modal.Dialog className="acdm-card text-slate-900 dark:text-slate-100 w-full max-w-4xl">
           <Modal.CloseTrigger />
           <Modal.Header>
-            <Modal.Heading className="text-white">{title}</Modal.Heading>
+            <Modal.Heading className="acdm-card-title">{title}</Modal.Heading>
           </Modal.Header>
           <Modal.Body className="max-h-[75vh] overflow-y-auto space-y-6">
             {!hasChanges ? (
@@ -72,10 +72,10 @@ export function MaintenancePreviewDialog({
               actionable.map((preview) => (
                 <div
                   key={preview.hostname}
-                  className="space-y-3 rounded-xl border border-slate-800 bg-slate-950/50 p-4"
+                  className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="font-mono text-sm text-white">
+                    <p className="font-mono text-sm text-slate-900 dark:text-white">
                       {preview.hostname}
                     </p>
                     <span

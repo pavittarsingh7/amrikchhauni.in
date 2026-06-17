@@ -30,14 +30,14 @@ export function DataTable<T extends object>({
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-slate-800">
-      <table className="w-full text-sm">
+    <div className="acdm-table-wrap">
+      <table className="acdm-table">
         <thead>
-          <tr className="border-b border-slate-800 bg-slate-900/50">
+          <tr className="acdm-table-head">
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`text-left px-4 py-3 text-xs uppercase tracking-wider text-slate-500 font-medium ${col.className ?? ""}`}
+                className={`acdm-table-head-cell ${col.className ?? ""}`}
               >
                 {col.header}
               </th>
@@ -46,12 +46,12 @@ export function DataTable<T extends object>({
         </thead>
         <tbody>
           {data.map((row) => (
-            <tr
-              key={getKey(row)}
-              className="border-b border-slate-800/50 hover:bg-slate-900/30 transition-colors"
-            >
+            <tr key={getKey(row)} className="acdm-table-row">
               {columns.map((col) => (
-                <td key={col.key} className={`px-4 py-3 text-slate-300 ${col.className ?? ""}`}>
+                <td
+                  key={col.key}
+                  className={`acdm-table-cell ${col.className ?? ""}`}
+                >
                   {col.render
                     ? col.render(row)
                     : String((row as Record<string, unknown>)[col.key] ?? "—")}
@@ -73,10 +73,14 @@ export function StatusBadge({
   variant?: "success" | "warning" | "error" | "default";
 }) {
   const colors = {
-    success: "bg-green-950/50 text-green-400 border-green-800",
-    warning: "bg-yellow-950/50 text-yellow-400 border-yellow-800",
-    error: "bg-red-950/50 text-red-400 border-red-800",
-    default: "bg-slate-800 text-slate-400 border-slate-700",
+    success:
+      "bg-green-100 text-green-700 border-green-200 dark:bg-green-950/50 dark:text-green-400 dark:border-green-800",
+    warning:
+      "bg-amber-100 text-amber-700 border-amber-200 dark:bg-yellow-950/50 dark:text-yellow-400 dark:border-yellow-800",
+    error:
+      "bg-red-100 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-800",
+    default:
+      "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
   };
 
   const autoVariant =

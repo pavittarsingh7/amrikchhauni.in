@@ -11,9 +11,9 @@ export default async function UsersPage() {
   return (
     <div className="p-6">
       <PageHeader title="Users" description="Manage user accounts and roles" />
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">User Accounts ({users.length})</Card.Title>
+          <Card.Title className="acdm-card-title">User Accounts ({users.length})</Card.Title>
           <Card.Description>Super Admin only — create, edit roles, reset passwords</Card.Description>
         </Card.Header>
         <Card.Content>

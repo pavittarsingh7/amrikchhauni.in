@@ -31,10 +31,10 @@ export function ConfirmDialog({
       isDismissable={!isLoading}
     >
       <Modal.Container placement="center" size="sm" scroll="inside">
-        <Modal.Dialog className="bg-slate-900 border border-slate-700 text-slate-100 w-full max-w-md">
+        <Modal.Dialog className="acdm-card text-slate-900 dark:text-slate-100 w-full max-w-md">
           <Modal.CloseTrigger />
           <Modal.Header>
-            <Modal.Heading className="text-white">{title}</Modal.Heading>
+            <Modal.Heading className="acdm-card-title">{title}</Modal.Heading>
           </Modal.Header>
           <Modal.Body>
             <p className="text-sm text-slate-400">{message}</p>
@@ -101,11 +101,11 @@ export function EntityModal({
         scroll="inside"
       >
         <Modal.Dialog
-          className={`bg-slate-900 border border-slate-700 text-slate-100 w-full ${dialogWidth[size]}`}
+          className={`acdm-card text-slate-900 dark:text-slate-100 w-full ${dialogWidth[size]}`}
         >
           <Modal.CloseTrigger />
           <Modal.Header>
-            <Modal.Heading className="text-white">{title}</Modal.Heading>
+            <Modal.Heading className="acdm-card-title">{title}</Modal.Heading>
           </Modal.Header>
           <Modal.Body className="max-h-[70vh] overflow-y-auto">
             {children}

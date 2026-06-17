@@ -18,9 +18,9 @@ export default async function ServicesPage() {
         description="Start, stop, and restart whitelisted Windows services"
       />
 
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">
+          <Card.Title className="acdm-card-title">
             Services ({services.length})
           </Card.Title>
           <Card.Description>

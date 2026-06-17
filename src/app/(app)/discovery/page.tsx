@@ -42,9 +42,9 @@ export default async function DiscoveryPage() {
 
       <DiscoveryHubClient readOnly={readOnly} />
 
-      <Card className="bg-slate-900 border border-slate-800 mt-8">
+      <Card className="acdm-card mt-8">
         <Card.Header>
-          <Card.Title className="text-white">
+          <Card.Title className="acdm-card-title">
             Pending Application Suggestions
           </Card.Title>
           <Card.Description>

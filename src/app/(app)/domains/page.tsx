@@ -30,9 +30,9 @@ export default async function DomainsPage() {
         }
       />
 
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">
+          <Card.Title className="acdm-card-title">
             Domains ({domains.length})
           </Card.Title>
         </Card.Header>

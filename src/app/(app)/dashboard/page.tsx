@@ -68,9 +68,9 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="bg-slate-900 border border-slate-800 lg:col-span-2">
+        <Card className="acdm-card lg:col-span-2">
           <Card.Header>
-            <Card.Title className="text-white">Recent Activity</Card.Title>
+            <Card.Title className="acdm-card-title">Recent Activity</Card.Title>
             <Card.Description>
               <Link href="/audit-logs" className="text-blue-400 hover:underline">
                 View all audit logs →
@@ -85,16 +85,16 @@ export default async function DashboardPage() {
                 {stats.recentAudit.map((log) => (
                   <div
                     key={log.id}
-                    className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-800/30 text-sm"
+                    className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-100 dark:bg-slate-800/30 text-sm"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <StatusBadge status={log.action} />
-                      <span className="text-slate-400">{log.module}</span>
-                      <span className="text-slate-500 truncate">
+                      <span className="text-slate-600 dark:text-slate-400">{log.module}</span>
+                      <span className="text-slate-500 dark:text-slate-500 truncate">
                         {log.username ?? "system"}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-600 whitespace-nowrap ml-2">
+                    <span className="text-xs text-slate-500 dark:text-slate-600 whitespace-nowrap ml-2">
                       {new Date(log.createdAt).toLocaleString()}
                     </span>
                   </div>
@@ -105,15 +105,15 @@ export default async function DashboardPage() {
         </Card>
 
         <div className="space-y-6">
-          <Card className="bg-slate-900 border border-slate-800">
+          <Card className="acdm-card">
             <Card.Header>
-              <Card.Title className="text-white">Applications by Status</Card.Title>
+              <Card.Title className="acdm-card-title">Applications by Status</Card.Title>
             </Card.Header>
             <Card.Content className="gap-2 flex flex-col">
               {stats.appsByStatus.map((s) => (
                 <div key={s.status} className="flex justify-between text-sm">
                   <StatusBadge status={s.status} />
-                  <span className="text-white font-medium">{s.count}</span>
+                  <span className="text-slate-900 dark:text-white font-medium">{s.count}</span>
                 </div>
               ))}
               {stats.appsByStatus.length === 0 && (
@@ -122,15 +122,15 @@ export default async function DashboardPage() {
             </Card.Content>
           </Card>
 
-          <Card className="bg-slate-900 border border-slate-800">
+          <Card className="acdm-card">
             <Card.Header>
-              <Card.Title className="text-white">Audit (30 days)</Card.Title>
+              <Card.Title className="acdm-card-title">Audit (30 days)</Card.Title>
             </Card.Header>
             <Card.Content className="gap-2 flex flex-col">
               {stats.auditByModule.slice(0, 8).map((m) => (
                 <div key={m.module} className="flex justify-between text-sm">
-                  <span className="text-slate-400">{m.module}</span>
-                  <span className="text-white">{m.count}</span>
+                  <span className="text-slate-600 dark:text-slate-400">{m.module}</span>
+                  <span className="text-slate-900 dark:text-white">{m.count}</span>
                 </div>
               ))}
               {stats.auditByModule.length === 0 && (
@@ -141,9 +141,9 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <Card className="bg-slate-900 border border-slate-800 mt-6">
+      <Card className="acdm-card mt-6">
         <Card.Header>
-          <Card.Title className="text-white">Quick Links</Card.Title>
+          <Card.Title className="acdm-card-title">Quick Links</Card.Title>
         </Card.Header>
         <Card.Content>
           <div className="flex flex-wrap gap-3 text-sm">

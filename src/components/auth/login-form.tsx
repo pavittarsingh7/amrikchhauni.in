@@ -31,11 +31,11 @@ export function LoginForm() {
       <Card.Content className="px-6 pb-6">
         <form action={formAction} className="flex flex-col gap-4">
           <TextField name="username" isRequired>
-            <Label>Username</Label>
+            <Label className="text-slate-300">Username</Label>
             <Input placeholder="Enter username" autoComplete="username" />
           </TextField>
           <TextField name="password" type="password" isRequired>
-            <Label>Password</Label>
+            <Label className="text-slate-300">Password</Label>
             <Input
               placeholder="Enter password"
               autoComplete="current-password"

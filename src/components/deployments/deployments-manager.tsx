@@ -29,9 +29,9 @@ export function DeploymentsManager({
 }: DeploymentsManagerProps) {
   return (
     <div className="space-y-8">
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">Deployment Types</Card.Title>
+          <Card.Title className="acdm-card-title">Deployment Types</Card.Title>
           <Card.Description>
             Master deployment methods — linked from application records
           </Card.Description>
@@ -50,9 +50,9 @@ export function DeploymentsManager({
         </Card.Content>
       </Card>
 
-      <Card className="bg-slate-900 border border-slate-800">
+      <Card className="acdm-card">
         <Card.Header>
-          <Card.Title className="text-white">Application Deployments</Card.Title>
+          <Card.Title className="acdm-card-title">Application Deployments</Card.Title>
           <Card.Description>
             Current deployment configuration per application (read-only overview)
           </Card.Description>
