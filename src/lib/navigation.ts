@@ -16,6 +16,7 @@ export const NAV_MODULES = [
   { key: "services", label: "Windows Services", href: "/services", icon: "Cog" },
   { key: "backups", label: "Backups", href: "/backups", icon: "Database" },
   { key: "audit-logs", label: "Audit Logs", href: "/audit-logs", icon: "ScrollText" },
+  { key: "docs", label: "Documentation", href: "/docs", icon: "BookOpen" },
   { key: "settings", label: "Settings", href: "/settings", icon: "Settings", superAdminOnly: true },
   { key: "users", label: "Users", href: "/users", icon: "UserCog", superAdminOnly: true },
   { key: "servers", label: "Servers", href: "/servers", icon: "HardDrive" },

@@ -24,6 +24,7 @@ import {
   UserCog,
   HardDrive,
   LogOut,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -53,6 +54,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Cog,
   Database,
   ScrollText,
+  BookOpen,
   Settings,
   UserCog,
   HardDrive,
