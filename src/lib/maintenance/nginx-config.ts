@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/db/prisma";
+import { assertMutableNginxPath } from "@/lib/nginx/immutable-paths";
 import type { NginxConfig } from "../../../generated/prisma/client";
 import {
   buildMaintenanceLocationBlock,
@@ -130,6 +131,7 @@ export async function writeNginxConfigFile(
   config: NginxConfig,
   content: string
 ): Promise<void> {
+  await assertMutableNginxPath(config.filepath);
   await fs.mkdir(path.dirname(config.filepath), { recursive: true });
   await fs.writeFile(config.filepath, content, "utf-8");
   await prisma.nginxConfig.update({

@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/db/prisma";
 import { writeAuditLog } from "@/lib/audit/logger";
+import { assertMutableNginxPath } from "@/lib/nginx/immutable-paths";
 import { getPathSetting } from "@/lib/settings/service";
 import { execNginx, execPowerShell } from "@/lib/shell/exec";
 
@@ -88,6 +89,7 @@ async function backupConfigFile(
 }
 
 async function writeConfigFile(filepath: string, content: string) {
+  await assertMutableNginxPath(filepath);
   await fs.mkdir(path.dirname(filepath), { recursive: true });
   await fs.writeFile(filepath, content, "utf-8");
 }

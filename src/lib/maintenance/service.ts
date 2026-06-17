@@ -2,17 +2,16 @@ import fs from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/db/prisma";
 import { writeAuditLog } from "@/lib/audit/logger";
-import { testNginxConfig, reloadNginx } from "@/lib/nginx/service";
 import {
   applyMaintenanceToContent,
   backupNginxConfigFile,
   ensureMaintenanceSnippetFiles,
   isMaintenanceNginxContent,
   resolveNginxConfigForDomain,
-  rollbackNginxChanges,
   writeNginxConfigFile,
   type NginxRollbackEntry,
 } from "./nginx-config";
+import { finalizeNginxMaintenanceChange } from "./nginx-apply";
 import {
   buildGlobalMaintenanceMarker,
   getMaintenanceDir,
@@ -376,17 +375,17 @@ export async function setSiteMaintenance(
     rollback
   );
 
-  const test = await testNginxConfig();
-  if (!test.passed) {
-    await rollbackNginxChanges(rollback);
-    await prisma.maintenanceConfig.updateMany({
-      where: { domainId, scope: "SITE" },
-      data: { enabled: !enabled },
-    });
-    throw new Error(`Nginx test failed — rolled back: ${test.output}`);
-  }
-
-  if (options.autoReload) await reloadNginx();
+  await finalizeNginxMaintenanceChange(rollback, {
+    autoReload: options.autoReload,
+    auditEntityId: domainId,
+    auditAction: enabled ? "site_enable" : "site_disable",
+    onRollback: async () => {
+      await prisma.maintenanceConfig.updateMany({
+        where: { domainId, scope: "SITE" },
+        data: { enabled: !enabled },
+      });
+    },
+  });
 
   await writeAuditLog({
     action: enabled ? "ENABLE" : "DISABLE",
@@ -438,15 +437,16 @@ export async function setServerMaintenance(
     );
   }
 
-  const test = await testNginxConfig();
-  if (!test.passed) {
-    await rollbackNginxChanges(rollback);
-    await prisma.maintenanceConfig.updateMany({
-      where: { scope: "SERVER" },
-      data: { enabled: !enabled },
-    });
-    throw new Error(`Nginx test failed — rolled back: ${test.output}`);
-  }
+  await finalizeNginxMaintenanceChange(rollback, {
+    autoReload: options.autoReload,
+    auditAction: enabled ? "server_enable" : "server_disable",
+    onRollback: async () => {
+      await prisma.maintenanceConfig.updateMany({
+        where: { scope: "SERVER" },
+        data: { enabled: !enabled },
+      });
+    },
+  });
 
   await writeGlobalMaintenanceMarker(
     enabled,
@@ -463,8 +463,6 @@ export async function setServerMaintenance(
           )
         ).filter(Boolean).length
   );
-
-  if (options.autoReload) await reloadNginx();
 
   await writeAuditLog({
     action: enabled ? "SERVER_ENABLE" : "SERVER_DISABLE",

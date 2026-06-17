@@ -6,8 +6,8 @@ export async function getMaintenanceDir(): Promise<string> {
 }
 
 export async function getNginxMaintenanceDir(): Promise<string> {
-  const nginxConf = await getPathSetting("paths.nginx_conf");
-  return path.join(nginxConf, "maintenance");
+  const maintenanceDir = await getMaintenanceDir();
+  return path.join(maintenanceDir, "nginx");
 }
 
 export async function getMaintenanceBackupDir(): Promise<string> {

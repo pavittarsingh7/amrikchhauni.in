@@ -173,8 +173,8 @@ export function MaintenanceManager({
           <Card.Header>
             <Card.Title className="acdm-card-title">Server-Wide Maintenance</Card.Title>
             <Card.Description>
-              Swaps every site&apos;s location / block to the maintenance include.
-              Does not modify proxy-common.conf or ssl-common.conf.
+              Swaps each site&apos;s location / block to serve the maintenance page.
+              Never modifies nginx.conf, proxy-common.conf, or ssl-common.conf.
             </Card.Description>
           </Card.Header>
           <Card.Content>
@@ -217,8 +217,9 @@ export function MaintenanceManager({
         <Card.Header>
           <Card.Title className="acdm-card-title">Per-Site Maintenance</Card.Title>
           <Card.Description>
-            Replaces location / with include of website-maintenance.conf. Original
-            config is backed up before apply.
+            Backs up the site config to D:\server-config\backups\nginx, swaps
+            location / to the maintenance include, validates with nginx -t, then
+            reloads. Rolls back automatically if validation fails.
           </Card.Description>
         </Card.Header>
         <Card.Content>
