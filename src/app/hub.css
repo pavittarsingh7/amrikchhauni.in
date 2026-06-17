@@ -4,6 +4,131 @@
   --font-display: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
+/* ─── Hub shell (landing + table) ───────────────────────────────────────── */
+
+.hub-shell {
+  @apply min-h-screen bg-gradient-to-b from-indigo-50/80 via-slate-50 to-sky-50/50 text-slate-800 antialiased transition-colors duration-300;
+}
+
+html.dark .hub-shell {
+  @apply from-slate-950 via-slate-950 to-slate-950 text-slate-100;
+}
+
+.hub-shell .hub-surface {
+  @apply border border-slate-200 bg-white text-slate-800 shadow-sm;
+}
+
+html.dark .hub-shell .hub-surface {
+  @apply border-slate-800 bg-slate-900/70 text-slate-100;
+}
+
+.hub-shell .hub-title {
+  @apply text-slate-900;
+}
+
+html.dark .hub-shell .hub-title {
+  @apply text-white;
+}
+
+.hub-shell .hub-subtitle {
+  @apply text-slate-600;
+}
+
+html.dark .hub-shell .hub-subtitle {
+  @apply text-slate-400;
+}
+
+.hub-shell .hub-muted {
+  @apply text-slate-500;
+}
+
+html.dark .hub-shell .hub-muted {
+  @apply text-slate-400;
+}
+
+/* HeroUI Card base inside hub — force readable light surfaces */
+html:not(.dark) .hub-shell [data-slot="base"] {
+  @apply bg-white text-slate-800;
+}
+
+html:not(.dark) .hub-shell [data-slot="content"],
+html:not(.dark) .hub-shell [data-slot="header"],
+html:not(.dark) .hub-shell [data-slot="footer"] {
+  @apply text-slate-800;
+}
+
+/* Hub table */
+.hub-shell .hub-table thead tr {
+  @apply border-b border-slate-200 bg-slate-100 text-slate-600;
+}
+
+html.dark .hub-shell .hub-table thead tr {
+  @apply border-slate-800 bg-slate-900/80 text-slate-400;
+}
+
+.hub-shell .hub-table thead th {
+  @apply bg-slate-100 text-slate-600;
+}
+
+html.dark .hub-shell .hub-table thead th {
+  @apply bg-slate-900/95 text-slate-400;
+}
+
+.hub-shell .hub-table tbody tr {
+  @apply border-b border-slate-200 text-slate-700 hover:bg-slate-50;
+}
+
+html.dark .hub-shell .hub-table tbody tr {
+  @apply border-slate-800 text-slate-300 hover:bg-slate-800/40;
+}
+
+.hub-shell .hub-table tbody td {
+  @apply text-slate-700;
+}
+
+html.dark .hub-shell .hub-table tbody td {
+  @apply text-slate-300;
+}
+
+.hub-shell .hub-table .hub-table-sticky {
+  @apply bg-white text-slate-900;
+}
+
+html.dark .hub-shell .hub-table .hub-table-sticky {
+  @apply bg-slate-900/95 text-white;
+}
+
+.hub-shell .hub-stat-pill {
+  @apply rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-slate-600 shadow-sm;
+}
+
+html.dark .hub-shell .hub-stat-pill {
+  @apply border-slate-800 bg-slate-900/80 text-slate-400;
+}
+
+.hub-shell .hub-stat-pill strong {
+  @apply text-slate-900;
+}
+
+html.dark .hub-shell .hub-stat-pill strong {
+  @apply text-slate-200;
+}
+
+/* Hub header buttons in light mode */
+html:not(.dark) .hub-shell [data-slot="button"][data-variant="secondary"] {
+  @apply border-slate-200 bg-white text-slate-700 hover:bg-slate-50;
+}
+
+html:not(.dark) .hub-shell [data-slot="label"] {
+  @apply text-slate-600;
+}
+
+html:not(.dark) .hub-shell [data-slot="input-wrapper"] {
+  @apply border-slate-300 bg-white;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+
 .opacity-0-start {
   opacity: 0;
   transform: translateY(12px);

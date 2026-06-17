@@ -21,10 +21,10 @@ export default async function HubTablePage() {
       <HubHeader view="table" />
 
       <section className="mb-8 text-center sm:mb-10">
-        <h1 className="opacity-0-start animate-fade-up-delay font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+        <h1 className="opacity-0-start animate-fade-up-delay font-display text-3xl font-bold tracking-tight hub-title sm:text-4xl">
           Projects
         </h1>
-        <p className="opacity-0-start animate-fade-up-delay-2 mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base dark:text-slate-400">
+        <p className="opacity-0-start animate-fade-up-delay-2 hub-subtitle mx-auto mt-3 max-w-2xl text-sm leading-relaxed sm:text-base">
           All application fields from the ACDM database in a filterable directory
           view.
         </p>

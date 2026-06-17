@@ -22,12 +22,12 @@ export default async function HubPage() {
           </span>
           Personal development &amp; client presentation
         </p>
-        <h1 className="opacity-0-start animate-fade-up-delay font-display text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white">
+        <h1 className="opacity-0-start animate-fade-up-delay font-display text-4xl font-bold tracking-tight hub-title sm:text-5xl lg:text-6xl">
           Project showcase
         </h1>
-        <p className="opacity-0-start animate-fade-up-delay-2 mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg dark:text-slate-400">
+        <p className="opacity-0-start animate-fade-up-delay-2 hub-subtitle mx-auto mt-5 max-w-2xl text-base leading-relaxed sm:text-lg">
           A curated directory of apps and demos hosted on subdomains.{" "}
-          <span className="text-slate-500 dark:text-slate-500">
+          <span className="hub-muted">
             This is only for testing and demos, not for production.
           </span>
         </p>

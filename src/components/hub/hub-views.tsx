@@ -14,7 +14,7 @@ import { CATEGORY_COLORS, STATUS_COLORS, badgeClass } from "@/lib/hub/constants"
 import { sortHubProjects, projectSearchText } from "@/lib/hub/utils";
 
 const selectClassName =
-  "w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 transition-all duration-300 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100";
+  "w-full cursor-pointer rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 shadow-sm transition-all duration-300 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100";
 
 function useHubFilter(projects: HubProject[]) {
   const [search, setSearch] = useState("");
@@ -89,7 +89,7 @@ function HubFiltersPanel({
   wideSearch?: boolean;
 }) {
   return (
-    <Card className="opacity-0-start animate-fade-up-delay-2 mb-8 acdm-hub-surface transition-shadow duration-300 hover:shadow-md">
+    <Card className="opacity-0-start animate-fade-up-delay-2 mb-8 hub-surface transition-shadow duration-300 hover:shadow-md">
       <Card.Content className="gap-4 p-4 sm:p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
           <TextField
@@ -98,14 +98,14 @@ function HubFiltersPanel({
             onChange={setSearch}
             aria-label="Search projects"
           >
-            <Label className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <Label className="text-xs font-medium uppercase tracking-wider hub-muted">
               Search
             </Label>
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
                 placeholder={searchPlaceholder}
-                className="bg-white pl-10 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+                className="border-slate-300 bg-white pl-10 text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
               />
             </div>
           </TextField>
@@ -114,7 +114,7 @@ function HubFiltersPanel({
             <div className="flex flex-col gap-1.5">
               <Label
                 htmlFor="hub-category"
-                className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                className="text-xs font-medium uppercase tracking-wider hub-muted"
               >
                 Category
               </Label>
@@ -135,7 +135,7 @@ function HubFiltersPanel({
             <div className="flex flex-col gap-1.5">
               <Label
                 htmlFor="hub-status"
-                className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                className="text-xs font-medium uppercase tracking-wider hub-muted"
               >
                 Status
               </Label>
@@ -155,7 +155,7 @@ function HubFiltersPanel({
             </div>
           </div>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs hub-muted">
           {filteredCount === total
             ? `Showing all ${total} projects`
             : `Showing ${filteredCount} of ${total} projects`}
@@ -169,7 +169,7 @@ function HubFiltersPanel({
 function ProjectCard({ project, index }: { project: HubProject; index: number }) {
   return (
     <Card
-      className="card-stagger group flex flex-col acdm-hub-surface opacity-0-start shadow-sm transition-all duration-300 animate-card-in hover:-translate-y-1 hover:border-indigo-300/60 hover:shadow-lg hover:shadow-indigo-500/10 dark:hover:border-indigo-500/40"
+      className="card-stagger group hub-surface flex flex-col opacity-0-start shadow-sm transition-all duration-300 animate-card-in hover:-translate-y-1 hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10 dark:hover:border-indigo-500/40"
       style={{ "--i": index } as React.CSSProperties}
     >
       <Card.Header className="flex flex-wrap items-start justify-between gap-2 pb-0">
@@ -194,26 +194,26 @@ function ProjectCard({ project, index }: { project: HubProject; index: number })
       </Card.Header>
 
       <Card.Content className="flex flex-1 flex-col gap-1 pt-2">
-        <h2 className="font-display text-lg font-semibold text-slate-900 transition-colors duration-300 group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400">
+        <h2 className="font-display text-lg font-semibold hub-title transition-colors duration-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
           {project.name}
         </h2>
-        <p className="font-mono text-xs text-indigo-600/90 dark:text-indigo-400/90">
+        <p className="font-mono text-xs text-indigo-700 dark:text-indigo-400/90">
           {project.subdomain}
           {project.port != null ? `:${project.port}` : ""}
         </p>
-        <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <p className="mt-2 flex-1 text-sm leading-relaxed hub-subtitle">
           {project.description}
         </p>
         {project.remark && (
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            <span className="font-medium text-slate-600 dark:text-slate-300">
+          <p className="mt-2 text-xs hub-muted">
+            <span className="font-medium text-slate-700 dark:text-slate-300">
               Note:
             </span>{" "}
             {project.remark}
           </p>
         )}
         {project.note && (
-          <p className="text-xs italic text-slate-400 dark:text-slate-500">
+          <p className="text-xs italic hub-muted">
             {project.note}
           </p>
         )}
@@ -236,12 +236,12 @@ function ProjectCard({ project, index }: { project: HubProject; index: number })
 
 function HubEmptyState() {
   return (
-    <Card className="border border-dashed border-slate-300 bg-transparent py-16 text-center dark:border-slate-700">
+    <Card className="border border-dashed border-slate-300 bg-white/50 py-16 text-center dark:border-slate-700 dark:bg-transparent">
       <Card.Content>
-        <p className="font-medium text-slate-500 dark:text-slate-400">
+        <p className="font-medium hub-subtitle">
           No projects match your filters
         </p>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-500">
+        <p className="mt-1 text-sm hub-muted">
           Try clearing search or filters.
         </p>
       </Card.Content>
@@ -338,12 +338,12 @@ export function HubTableView({ projects }: { projects: HubProject[] }) {
         {f.filtered.length === 0 ? (
           <HubEmptyState />
         ) : (
-          <Card className="overflow-hidden acdm-hub-surface">
+          <Card className="hub-surface overflow-hidden">
             <Card.Content className="overflow-x-auto p-0">
-              <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
+              <table className="hub-table w-full min-w-[1100px] border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50/80 text-xs font-medium uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-400">
-                    <th className="sticky left-0 z-20 min-w-[160px] bg-slate-50/95 px-4 py-3 backdrop-blur dark:bg-slate-900/95">
+                  <tr className="text-xs font-medium uppercase tracking-wider">
+                    <th className="hub-table-sticky sticky left-0 z-20 min-w-[160px] px-4 py-3 backdrop-blur">
                       Name
                     </th>
                     <th className="px-4 py-3">Subdomain</th>
@@ -359,21 +359,16 @@ export function HubTableView({ projects }: { projects: HubProject[] }) {
                 </thead>
                 <tbody>
                   {f.filtered.map((project) => (
-                    <tr
-                      key={project.id}
-                      className="border-b border-slate-200/80 transition-colors hover:bg-slate-50/80 dark:border-slate-800 dark:hover:bg-slate-800/40"
-                    >
-                      <td className="sticky left-0 z-10 min-w-[160px] bg-white/95 px-4 py-3 font-medium text-slate-900 backdrop-blur dark:bg-slate-900/95 dark:text-white">
+                    <tr key={project.id}>
+                      <td className="hub-table-sticky sticky left-0 z-10 min-w-[160px] px-4 py-3 font-medium backdrop-blur">
                         {project.name}
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs text-indigo-600/90 dark:text-indigo-400/90">
+                      <td className="px-4 py-3 font-mono text-xs text-indigo-700 dark:text-indigo-400/90">
                         {project.subdomain}
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-700 dark:text-slate-300">
+                      <td className="px-4 py-3 font-mono text-xs">
                         {project.port ?? (
-                          <span className="text-slate-400 dark:text-slate-500">
-                            —
-                          </span>
+                          <span className="hub-muted">—</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -381,12 +376,12 @@ export function HubTableView({ projects }: { projects: HubProject[] }) {
                           href={project.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400"
+                          className="text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-400"
                         >
                           {project.url}
                         </Link>
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                      <td className="px-4 py-3 hub-subtitle">
                         {project.description || "—"}
                       </td>
                       <td className="px-4 py-3">
@@ -406,19 +401,17 @@ export function HubTableView({ projects }: { projects: HubProject[] }) {
                       <td className="px-4 py-3 text-center">
                         {project.featured ? (
                           <Star
-                            className="mx-auto h-4 w-4 text-indigo-600 dark:text-indigo-400"
+                            className="mx-auto h-4 w-4 text-indigo-700 dark:text-indigo-400"
                             aria-label="Featured"
                           />
                         ) : (
-                          <span className="text-slate-400 dark:text-slate-500">
-                            —
-                          </span>
+                          <span className="hub-muted">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                      <td className="px-4 py-3 hub-subtitle">
                         {project.remark || "—"}
                       </td>
-                      <td className="px-4 py-3 italic text-slate-500 dark:text-slate-500">
+                      <td className="px-4 py-3 italic hub-muted">
                         {project.note || "—"}
                       </td>
                     </tr>

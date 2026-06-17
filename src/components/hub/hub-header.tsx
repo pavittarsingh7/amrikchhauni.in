@@ -19,10 +19,10 @@ export function HubHeader({ view }: HubHeaderProps) {
           AC
         </span>
         <div>
-          <p className="font-display text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
+          <p className="font-display text-lg font-semibold tracking-tight hub-title">
             amrikchhauni.in
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs hub-muted">
             Development &amp; demo hub
           </p>
         </div>
