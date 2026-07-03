@@ -15,6 +15,7 @@ generated/
 # Environment
 .env
 .env.local
+.env.docker
 .env.*.local
 
 # Debug

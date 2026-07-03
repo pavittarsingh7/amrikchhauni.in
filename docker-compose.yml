@@ -1,0 +1,17 @@
+services:
+  acdm:
+    container_name: acdm
+
+    build:
+      context: .
+
+    ports:
+      - "3000:3000"
+
+    restart: unless-stopped
+
+    env_file:
+      - .env.docker
+
+    environment:
+      NODE_ENV: production
