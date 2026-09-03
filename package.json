@@ -12,7 +12,8 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "test": "tsx --test src/lib/deployments/mask.test.ts src/lib/deployments/commands.test.ts src/lib/deployments/validation.test.ts src/lib/deployments/workflows.test.ts src/lib/deployments/executor.test.ts src/lib/git/service.test.ts"
   },
   "dependencies": {
     "@heroui/react": "^3.2.0",

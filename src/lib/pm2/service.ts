@@ -36,6 +36,17 @@ export async function pm2Restart(name: string) {
   await refreshDiscovery();
 }
 
+export async function pm2Reload(name: string) {
+  try {
+    await execPm2(["reload", name]);
+    await writeAuditLog({ action: "RELOAD", module: "pm2", entityId: name });
+  } catch {
+    await execPm2(["restart", name]);
+    await writeAuditLog({ action: "RESTART", module: "pm2", entityId: name });
+  }
+  await refreshDiscovery();
+}
+
 export async function pm2Delete(name: string) {
   await execPm2(["delete", name]);
   await prisma.pm2Process.deleteMany({ where: { name } });

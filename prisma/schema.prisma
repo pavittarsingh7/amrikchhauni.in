@@ -65,6 +65,18 @@ enum MaintenanceScope {
   SERVER
 }
 
+enum DeploymentStatus {
+  QUEUED
+  RUNNING
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum DeploymentTrigger {
+  MANUAL
+}
+
 // ─── Auth & Users ──────────────────────────────────────────────────────────
 
 model User {
@@ -78,6 +90,7 @@ model User {
 
   createdApplications Application[] @relation("ApplicationCreatedBy")
   auditLogs           AuditLog[]
+  deployments         Deployment[]  @relation("DeploymentTriggeredBy")
 
   @@map("users")
 }
@@ -112,6 +125,8 @@ model Server {
   isCurrent         Boolean  @default(false) @map("is_current")
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
+
+  deployments Deployment[]
 
   @@map("servers")
 }
@@ -207,6 +222,8 @@ model Application {
   pm2Processes Pm2Process[]
   iisSites     IisSite[]
   maintenance  MaintenanceConfig[]
+  deployments  Deployment[]
+  gitStatus    GitRepositoryStatus?
 
   @@index([status])
   @@index([clientId])
@@ -474,4 +491,68 @@ model Snapshot {
   @@index([entity])
   @@index([entityId])
   @@map("snapshots")
+}
+
+// ─── Git status cache (no filesystem scans; per known application) ───────────
+
+model GitRepositoryStatus {
+  id            String    @id @default(cuid())
+  applicationId String    @unique @map("application_id")
+  branch        String?
+  localCommit   String?   @map("local_commit")
+  remoteCommit  String?   @map("remote_commit")
+  ahead         Int       @default(0)
+  behind        Int       @default(0)
+  dirty         Boolean   @default(false)
+  provider      String?
+  lastFetchedAt DateTime? @map("last_fetched_at")
+  lastError     String?   @map("last_error")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("git_repository_statuses")
+}
+
+// ─── Deployment runs ─────────────────────────────────────────────────────────
+
+model Deployment {
+  id                   String             @id @default(cuid())
+  sequence             Int                @unique @default(autoincrement())
+  applicationId        String?            @map("application_id")
+  applicationName      String             @map("application_name")
+  serverId             String?            @map("server_id")
+  serverName           String?            @map("server_name")
+  triggeredById        String?            @map("triggered_by_id")
+  triggeredByUsername  String?            @map("triggered_by_username")
+  status               DeploymentStatus   @default(QUEUED)
+  trigger              DeploymentTrigger  @default(MANUAL)
+  branch               String?
+  commitBefore         String?            @map("commit_before")
+  commitAfter          String?            @map("commit_after")
+  runtime              String?
+  currentStage         String?            @map("current_stage")
+  failedStage          String?            @map("failed_stage")
+  exitCode             Int?               @map("exit_code")
+  error                String?            @db.Text
+  log                  String             @default("") @db.Text
+  cancelRequested      Boolean            @default(false) @map("cancel_requested")
+  startedAt            DateTime?          @map("started_at")
+  completedAt          DateTime?          @map("completed_at")
+  durationMs           Int?               @map("duration_ms")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  server      Server?      @relation(fields: [serverId], references: [id], onDelete: SetNull)
+  triggeredBy User?        @relation("DeploymentTriggeredBy", fields: [triggeredById], references: [id], onDelete: SetNull)
+
+  @@index([applicationId])
+  @@index([serverId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([triggeredById])
+  @@index([branch])
+  @@map("deployments")
 }

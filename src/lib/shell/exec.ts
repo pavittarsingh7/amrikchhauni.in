@@ -9,6 +9,13 @@ export interface ExecResult {
   stderr: string;
 }
 
+export interface ExecCaptureResult {
+  ok: boolean;
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+}
+
 interface SpawnTarget {
   command: string;
   args: string[];
@@ -47,11 +54,11 @@ function formatExecError(
   return err.code ? `${detail} (${label}, code ${err.code})` : `${detail} (${label})`;
 }
 
-export async function execCommand(
+export async function execCommandCapture(
   command: string,
   args: string[] = [],
   options: { cwd?: string; timeout?: number } = {}
-): Promise<ExecResult> {
+): Promise<ExecCaptureResult> {
   const { cwd, timeout = 60_000 } = options;
   const target = resolveSpawnTarget(command, args);
 
@@ -63,16 +70,51 @@ export async function execCommand(
       windowsHide: true,
       shell: false,
     });
-    return { stdout: stdout.toString(), stderr: stderr.toString() };
+    return {
+      ok: true,
+      stdout: stdout.toString(),
+      stderr: stderr.toString(),
+      exitCode: 0,
+    };
   } catch (err: unknown) {
     const error = err as {
       code?: string | number;
-      stdout?: Buffer;
-      stderr?: Buffer;
+      stdout?: Buffer | string;
+      stderr?: Buffer | string;
       message?: string;
     };
-    throw new Error(formatExecError(command, args, error));
+    const stdout = error.stdout?.toString() ?? "";
+    const stderr = error.stderr?.toString() ?? "";
+    const numeric =
+      typeof error.code === "number"
+        ? error.code
+        : Number.parseInt(String(error.code ?? ""), 10);
+    return {
+      ok: false,
+      stdout,
+      stderr: stderr || error.message || "Command failed",
+      exitCode: Number.isFinite(numeric) ? numeric : 1,
+    };
   }
+}
+
+export async function execCommand(
+  command: string,
+  args: string[] = [],
+  options: { cwd?: string; timeout?: number } = {}
+): Promise<ExecResult> {
+  const result = await execCommandCapture(command, args, options);
+  if (!result.ok) {
+    throw new Error(
+      formatExecError(command, args, {
+        code: result.exitCode,
+        message: result.stderr,
+        stdout: Buffer.from(result.stdout),
+        stderr: Buffer.from(result.stderr),
+      })
+    );
+  }
+  return { stdout: result.stdout, stderr: result.stderr };
 }
 
 export async function execPowerShell(script: string): Promise<string> {

@@ -6,4 +6,6 @@ export {
   BackupType,
   BackupStatus,
   MaintenanceScope,
+  DeploymentStatus,
+  DeploymentTrigger,
 } from "../../../generated/prisma/client";
