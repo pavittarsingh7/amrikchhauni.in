@@ -31,6 +31,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   services: "Windows Services",
   general: "General",
   ports: "Port Configuration",
+  git: "Git / Private Repos",
 };
 
 export default function SettingsPage() {
@@ -126,7 +127,16 @@ export default function SettingsPage() {
                       className="w-full"
                     >
                       <Label>{setting.label}</Label>
-                      <Input className="font-mono text-sm" />
+                      <Input
+                        className="font-mono text-sm"
+                        type={setting.isSecret ? "password" : "text"}
+                        autoComplete={setting.isSecret ? "new-password" : "off"}
+                        placeholder={
+                          setting.isSecret
+                            ? "Paste a new token to update (leave unchanged to keep)"
+                            : undefined
+                        }
+                      />
                       {setting.description && (
                         <Description>{setting.description}</Description>
                       )}

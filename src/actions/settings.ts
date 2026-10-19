@@ -20,7 +20,7 @@ export async function getSettingsAction(category?: string) {
   if (category) {
     return getSettingsByCategory(category);
   }
-  const categories = ["paths", "services", "general", "ports"];
+  const categories = ["paths", "services", "general", "ports", "git"];
   const result: Record<string, Awaited<ReturnType<typeof getSettingsByCategory>>> = {};
   for (const cat of categories) {
     result[cat] = await getSettingsByCategory(cat);

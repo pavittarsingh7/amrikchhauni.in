@@ -27,6 +27,12 @@ describe("maskSecrets", () => {
     assert.match(out, /\[REDACTED PRIVATE KEY\]/);
   });
 
+  it("masks basic authorization headers", () => {
+    const out = maskSecrets("AUTHORIZATION: basic dXNlcjpwYXNz");
+    assert.equal(out.includes("dXNlcjpwYXNz"), false);
+    assert.match(out, /AUTHORIZATION:\s*basic\s+\*\*\*/i);
+  });
+
   it("masks bearer headers", () => {
     const out = maskSecrets("Authorization: Bearer super-secret-value");
     assert.equal(out.includes("super-secret-value"), false);

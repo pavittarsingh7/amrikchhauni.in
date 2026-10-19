@@ -4,12 +4,13 @@ const GITHUB_FINE_GRAINED = /github_pat_[A-Za-z0-9_]{20,}/g;
 const GITLAB_PAT = /glpat-[A-Za-z0-9_-]{20,}/g;
 const AZURE_PAT = /(?<=:)[a-zA-Z0-9_-]{20,}(?=@)/g;
 const BEARER = /(Bearer\s+)\S+/gi;
-const AUTHORIZATION = /(Authorization:\s*)\S+/gi;
+const AUTHORIZATION = /(Authorization:\s*(?:basic\s+)?)\S+/gi;
 const KEY_VALUE_SECRET =
   /((?:password|passwd|pwd|secret|token|api[_-]?key|access[_-]?key|private[_-]?key)\s*[=:]\s*)["']?[^\s"'\\]+["']?/gi;
 const PRIVATE_KEY =
   /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g;
 const NPM_TOKEN = /npm_[A-Za-z0-9]{20,}/g;
+const GIT_CONFIG_VALUE = /(GIT_CONFIG_VALUE_\d+=).+/gi;
 
 export function maskSecrets(text: string): string {
   if (!text) return text;
@@ -23,5 +24,6 @@ export function maskSecrets(text: string): string {
     .replace(AUTHORIZATION, "$1***")
     .replace(KEY_VALUE_SECRET, "$1***")
     .replace(PRIVATE_KEY, "[REDACTED PRIVATE KEY]")
+    .replace(GIT_CONFIG_VALUE, "$1***")
     .replace(AZURE_PAT, "***");
 }

@@ -57,15 +57,20 @@ function formatExecError(
 export async function execCommandCapture(
   command: string,
   args: string[] = [],
-  options: { cwd?: string; timeout?: number } = {}
+  options: {
+    cwd?: string;
+    timeout?: number;
+    env?: NodeJS.ProcessEnv;
+  } = {}
 ): Promise<ExecCaptureResult> {
-  const { cwd, timeout = 60_000 } = options;
+  const { cwd, timeout = 60_000, env } = options;
   const target = resolveSpawnTarget(command, args);
 
   try {
     const { stdout, stderr } = await execFileAsync(target.command, target.args, {
       cwd,
       timeout,
+      env,
       maxBuffer: 10 * 1024 * 1024,
       windowsHide: true,
       shell: false,
@@ -89,10 +94,18 @@ export async function execCommandCapture(
       typeof error.code === "number"
         ? error.code
         : Number.parseInt(String(error.code ?? ""), 10);
+    // Prefer real command output over Node's generic "Command failed: cmd.exe ..." wrapper.
+    const detail =
+      stderr.trim() ||
+      stdout.trim() ||
+      (error.message && !error.message.startsWith("Command failed:")
+        ? error.message
+        : "") ||
+      "Command failed";
     return {
       ok: false,
       stdout,
-      stderr: stderr || error.message || "Command failed",
+      stderr: detail,
       exitCode: Number.isFinite(numeric) ? numeric : 1,
     };
   }
@@ -101,7 +114,11 @@ export async function execCommandCapture(
 export async function execCommand(
   command: string,
   args: string[] = [],
-  options: { cwd?: string; timeout?: number } = {}
+  options: {
+    cwd?: string;
+    timeout?: number;
+    env?: NodeJS.ProcessEnv;
+  } = {}
 ): Promise<ExecResult> {
   const result = await execCommandCapture(command, args, options);
   if (!result.ok) {

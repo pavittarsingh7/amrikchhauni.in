@@ -3,6 +3,12 @@ import path from "path";
 import { execCommandCapture, type ExecCaptureResult } from "@/lib/shell/exec";
 import { parseRevListCounts } from "@/lib/deployments/commands";
 import { maskSecrets } from "@/lib/deployments/mask";
+import {
+  buildGitAuthEnv,
+  explainGitRemoteFailure,
+  getGitAuthConfig,
+  type GitAuthConfig,
+} from "@/lib/git/auth";
 
 const ALLOWED_GIT_SUBCOMMANDS = new Set([
   "fetch",
@@ -18,8 +24,16 @@ const ALLOWED_GIT_SUBCOMMANDS = new Set([
 export type GitExecFn = (
   command: string,
   args: string[],
-  options?: { cwd?: string; timeout?: number }
+  options?: { cwd?: string; timeout?: number; env?: NodeJS.ProcessEnv }
 ) => Promise<ExecCaptureResult>;
+
+export type GitExecOptions = {
+  timeout?: number;
+  exec?: GitExecFn;
+  /** When set, skip Settings lookup (tests / custom runners). */
+  auth?: GitAuthConfig;
+  remoteUrl?: string | null;
+};
 
 export class GitError extends Error {
   exitCode: number;
@@ -61,20 +75,79 @@ export async function assertGitRepository(projectPath: string): Promise<void> {
   }
 }
 
+async function resolveRemoteUrl(
+  projectPath: string,
+  options?: GitExecOptions
+): Promise<string | null> {
+  if (options?.remoteUrl) return options.remoteUrl;
+  if (options?.exec) return null;
+  try {
+    const result = await execCommandCapture(
+      "git",
+      ["remote", "get-url", "origin"],
+      {
+        cwd: projectPath,
+        timeout: 15_000,
+        env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+      }
+    );
+    if (!result.ok) return null;
+    return result.stdout.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveAuthEnv(
+  projectPath: string,
+  options?: GitExecOptions
+): Promise<{ env: NodeJS.ProcessEnv; auth: GitAuthConfig; remoteUrl: string | null }> {
+  const auth = options?.auth ?? (await getGitAuthConfig());
+  const remoteUrl = await resolveRemoteUrl(projectPath, options);
+  return {
+    auth,
+    remoteUrl,
+    env: buildGitAuthEnv(auth, remoteUrl),
+  };
+}
+
 export async function gitExec(
   projectPath: string,
   args: string[],
-  options: { timeout?: number; exec?: GitExecFn } = {}
+  options: GitExecOptions = {}
 ): Promise<ExecCaptureResult> {
   assertSafeGitArgs(args);
   if (!options.exec) {
     await assertGitRepository(projectPath);
   }
+
+  const { env, auth, remoteUrl } = options.exec
+    ? {
+        env: undefined as NodeJS.ProcessEnv | undefined,
+        auth: options.auth ?? ({ mode: "none" } as GitAuthConfig),
+        remoteUrl: options.remoteUrl ?? null,
+      }
+    : await resolveAuthEnv(projectPath, options);
+
   const exec = options.exec ?? execCommandCapture;
   const result = await exec("git", args, {
     cwd: projectPath,
     timeout: options.timeout ?? 120_000,
+    env,
   });
+
+  if (!result.ok) {
+    const explained = explainGitRemoteFailure(result.stderr || result.stdout, {
+      hasTokenConfigured: auth.mode === "https_token",
+      remoteUrl,
+    });
+    return {
+      ...result,
+      stdout: maskSecrets(result.stdout),
+      stderr: maskSecrets(explained),
+    };
+  }
+
   return {
     ...result,
     stdout: maskSecrets(result.stdout),
@@ -85,7 +158,7 @@ export async function gitExec(
 async function gitText(
   projectPath: string,
   args: string[],
-  options?: { timeout?: number; exec?: GitExecFn }
+  options?: GitExecOptions
 ): Promise<string> {
   const result = await gitExec(projectPath, args, options);
   if (!result.ok) {
@@ -133,17 +206,17 @@ function parseLog(output: string): GitCommitInfo[] {
 
 export async function fetchRemote(
   projectPath: string,
-  options?: { exec?: GitExecFn }
+  options?: GitExecOptions
 ): Promise<ExecCaptureResult> {
   return gitExec(projectPath, ["fetch", "origin", "--prune"], {
     timeout: 120_000,
-    exec: options?.exec,
+    ...options,
   });
 }
 
 export async function getLocalHead(
   projectPath: string,
-  options?: { exec?: GitExecFn }
+  options?: GitExecOptions
 ): Promise<string | null> {
   try {
     const sha = await gitText(projectPath, ["rev-parse", "HEAD"], options);
@@ -156,7 +229,7 @@ export async function getLocalHead(
 export async function getRemoteHead(
   projectPath: string,
   branch: string,
-  options?: { exec?: GitExecFn }
+  options?: GitExecOptions
 ): Promise<string | null> {
   try {
     const sha = await gitText(
@@ -173,15 +246,20 @@ export async function getRemoteHead(
 export async function compareWithRemote(
   projectPath: string,
   branch: string,
-  options?: { exec?: GitExecFn; fetchFirst?: boolean }
+  options?: GitExecOptions & { fetchFirst?: boolean }
 ): Promise<GitCompareResult> {
   if (!options?.exec) {
     await assertGitRepository(projectPath);
   }
   const exec = options?.exec;
+  const shared: GitExecOptions = {
+    exec,
+    auth: options?.auth,
+    remoteUrl: options?.remoteUrl,
+  };
 
   if (options?.fetchFirst !== false) {
-    const fetchResult = await fetchRemote(projectPath, { exec });
+    const fetchResult = await fetchRemote(projectPath, shared);
     if (!fetchResult.ok) {
       throw new GitError(
         fetchResult.stderr.trim() || "git fetch failed",
@@ -190,8 +268,8 @@ export async function compareWithRemote(
     }
   }
 
-  const localCommit = await getLocalHead(projectPath, { exec });
-  const remoteCommit = await getRemoteHead(projectPath, branch, { exec });
+  const localCommit = await getLocalHead(projectPath, shared);
+  const remoteCommit = await getRemoteHead(projectPath, branch, shared);
 
   let ahead = 0;
   let behind = 0;
@@ -199,7 +277,7 @@ export async function compareWithRemote(
     const counts = await gitText(
       projectPath,
       ["rev-list", "--left-right", "--count", `HEAD...origin/${branch}`],
-      { exec }
+      shared
     );
     const parsed = parseRevListCounts(counts);
     ahead = parsed.ahead;
@@ -208,7 +286,7 @@ export async function compareWithRemote(
 
   let dirty = false;
   try {
-    const status = await gitText(projectPath, ["status", "--porcelain"], { exec });
+    const status = await gitText(projectPath, ["status", "--porcelain"], shared);
     dirty = status.length > 0;
   } catch {
     dirty = false;
@@ -222,7 +300,7 @@ export async function compareWithRemote(
 
   try {
     recent = parseLog(
-      await gitText(projectPath, [...logFormat, "-n", "12", "HEAD"], { exec })
+      await gitText(projectPath, [...logFormat, "-n", "12", "HEAD"], shared)
     );
   } catch {
     recent = [];
@@ -234,7 +312,7 @@ export async function compareWithRemote(
         await gitText(
           projectPath,
           [...logFormat, "-n", "30", `HEAD..origin/${branch}`],
-          { exec }
+          shared
         )
       );
     } catch {
@@ -244,7 +322,7 @@ export async function compareWithRemote(
       const diff = await gitText(
         projectPath,
         ["diff", "--name-only", `HEAD...origin/${branch}`],
-        { exec }
+        shared
       );
       changedFiles = diff.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
     } catch {
@@ -268,11 +346,11 @@ export async function compareWithRemote(
 export async function pullFastForward(
   projectPath: string,
   branch: string,
-  options?: { exec?: GitExecFn }
+  options?: GitExecOptions
 ): Promise<ExecCaptureResult> {
   await fetchRemote(projectPath, options);
   return gitExec(projectPath, ["pull", "--ff-only", "origin", branch], {
     timeout: 180_000,
-    exec: options?.exec,
+    ...options,
   });
 }

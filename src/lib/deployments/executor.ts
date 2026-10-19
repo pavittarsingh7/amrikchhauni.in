@@ -28,11 +28,12 @@ export type WorkflowContext = {
   pm2Names: string[];
   iisSites: { name: string; appPool: string | null }[];
   healthPort: number | null;
+  remoteUrl?: string | null;
   gitExec?: GitExecFn;
   commandExec?: (
     command: string,
     args: string[],
-    options?: { cwd?: string; timeout?: number }
+    options?: { cwd?: string; timeout?: number; env?: NodeJS.ProcessEnv }
   ) => Promise<ExecCaptureResult>;
   hooks?: RuntimeHooks;
   shouldCancel?: () => Promise<boolean>;
@@ -100,6 +101,7 @@ export async function executeWorkflow(ctx: WorkflowContext): Promise<WorkflowRes
         const compare = await compareWithRemote(ctx.projectPath, ctx.branch, {
           exec: ctx.gitExec,
           fetchFirst: true,
+          remoteUrl: ctx.remoteUrl,
         });
         commitBefore = compare.localCommit;
         await ctx.log("Fetching repository...");
@@ -112,6 +114,7 @@ export async function executeWorkflow(ctx: WorkflowContext): Promise<WorkflowRes
       if (stage.kind === "git-pull") {
         const pulled = await pullFastForward(ctx.projectPath, ctx.branch, {
           exec: ctx.gitExec,
+          remoteUrl: ctx.remoteUrl,
         });
         const output = formatOutput(pulled);
         if (output) await ctx.log(output);

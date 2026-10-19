@@ -102,7 +102,10 @@ export async function refreshApplicationGitStatus(applicationId: string, role: U
   const provider = detectGitProvider(app.repositoryUrl);
 
   try {
-    const compare = await compareWithRemote(app.projectPath!, branch, { fetchFirst: true });
+    const compare = await compareWithRemote(app.projectPath!, branch, {
+      fetchFirst: true,
+      remoteUrl: app.repositoryUrl,
+    });
     const status = await upsertGitStatus(applicationId, {
       branch: compare.branch,
       localCommit: compare.localCommit,
@@ -139,7 +142,9 @@ export async function syncApplicationRepository(applicationId: string, role: Use
   const branch = app.branch?.trim() || "main";
   const provider = detectGitProvider(app.repositoryUrl);
 
-  const pull = await pullFastForward(app.projectPath!, branch);
+  const pull = await pullFastForward(app.projectPath!, branch, {
+    remoteUrl: app.repositoryUrl,
+  });
   if (!pull.ok) {
     const message = maskSecrets(pull.stderr || pull.stdout || "git pull failed");
     await upsertGitStatus(applicationId, {
@@ -155,7 +160,10 @@ export async function syncApplicationRepository(applicationId: string, role: Use
     throw new Error(message);
   }
 
-  const compare = await compareWithRemote(app.projectPath!, branch, { fetchFirst: false });
+  const compare = await compareWithRemote(app.projectPath!, branch, {
+    fetchFirst: false,
+    remoteUrl: app.repositoryUrl,
+  });
   const status = await upsertGitStatus(applicationId, {
     branch: compare.branch,
     localCommit: compare.localCommit,
@@ -285,7 +293,10 @@ export async function getApplicationChanges(applicationId: string, role: UserRol
   assertSyncPermission(role);
   const app = validateDeployTarget(await loadApplication(applicationId));
   const branch = app.branch?.trim() || "main";
-  const compare = await compareWithRemote(app.projectPath!, branch, { fetchFirst: true });
+  const compare = await compareWithRemote(app.projectPath!, branch, {
+    fetchFirst: true,
+    remoteUrl: app.repositoryUrl,
+  });
   await upsertGitStatus(applicationId, {
     branch: compare.branch,
     localCommit: compare.localCommit,
@@ -678,6 +689,7 @@ export async function runQueuedDeployment(deploymentId: string) {
     pm2Names: app.pm2Processes.map((p) => p.name),
     iisSites: app.iisSites.map((s) => ({ name: s.name, appPool: s.appPool })),
     healthPort,
+    remoteUrl: app.repositoryUrl,
     hooks: {
       reloadPm2: pm2Reload,
       recycleIis: async (site) => {

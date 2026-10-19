@@ -134,7 +134,35 @@ export const DEFAULT_SETTINGS: SettingDefinition[] = [
     category: "ports",
     label: "Port Range End",
   },
+  {
+    key: "git.auth_mode",
+    value: "none",
+    category: "git",
+    label: "Git Auth Mode",
+    description:
+      "none = use machine credentials/SSH only. https_token = use a Personal Access Token for private HTTPS remotes (recommended for PM2).",
+  },
+  {
+    key: "git.https_username",
+    value: "x-access-token",
+    category: "git",
+    label: "HTTPS Username",
+    description:
+      "GitHub: x-access-token. GitLab: oauth2 or your username. Azure DevOps: any non-empty username.",
+  },
+  {
+    key: "git.https_token",
+    value: "",
+    category: "git",
+    label: "HTTPS Token (PAT)",
+    description:
+      "Personal Access Token with read access to private repositories. Never commit this value. Stored as a secret setting.",
+    isSecret: true,
+  },
 ];
+
+/** Placeholder shown in the Settings UI for secret values that already exist. */
+export const SECRET_PLACEHOLDER = "••••••••";
 
 export async function getSetting(key: string): Promise<string | null> {
   const setting = await prisma.setting.findUnique({ where: { key } });
@@ -144,13 +172,15 @@ export async function getSetting(key: string): Promise<string | null> {
 export async function getSettingsByCategory(
   category: string
 ): Promise<SettingDefinition[]> {
+  await ensureDefaultSettings();
   const settings = await prisma.setting.findMany({
     where: { category },
     orderBy: { key: "asc" },
   });
   return settings.map((s) => ({
     key: s.key,
-    value: s.value,
+    // Never send raw secrets to the browser; Super Admin pastes a new value to rotate.
+    value: s.isSecret ? (s.value ? SECRET_PLACEHOLDER : "") : s.value,
     category: s.category,
     label: s.label ?? s.key,
     description: s.description ?? undefined,
@@ -166,7 +196,7 @@ export async function getAllSettings(): Promise<
 
   for (const s of settings) {
     if (!grouped[s.category]) grouped[s.category] = {};
-    grouped[s.category][s.key] = s.isSecret ? "••••••••" : s.value;
+    grouped[s.category][s.key] = s.isSecret ? SECRET_PLACEHOLDER : s.value;
   }
 
   return grouped;
@@ -179,22 +209,39 @@ export async function updateSetting(
   const before = await prisma.setting.findUnique({ where: { key } });
   if (!before) throw new Error(`Setting not found: ${key}`);
 
+  // Keep existing secret when the UI posts the masked placeholder or an empty rotate skip.
+  if (before.isSecret && (value === SECRET_PLACEHOLDER || value === "")) {
+    return;
+  }
+
   const after = await prisma.setting.update({
     where: { key },
     data: { value },
   });
 
-  await createSnapshot("settings", { key, value: after.value });
+  const snapshotValue = before.isSecret ? SECRET_PLACEHOLDER : after.value;
+  await createSnapshot("settings", { key, value: snapshotValue });
   await writeAuditLog({
     action: "UPDATE",
     module: "settings",
     entityId: key,
-    before: { key: before.key, value: before.value },
-    after: { key: after.key, value: after.value },
+    before: {
+      key: before.key,
+      value: before.isSecret ? SECRET_PLACEHOLDER : before.value,
+    },
+    after: {
+      key: after.key,
+      value: before.isSecret ? SECRET_PLACEHOLDER : after.value,
+    },
   });
 }
 
 export async function seedDefaultSettings(): Promise<void> {
+  await ensureDefaultSettings();
+}
+
+/** Create any missing default settings without overwriting existing values. */
+export async function ensureDefaultSettings(): Promise<void> {
   for (const def of DEFAULT_SETTINGS) {
     await prisma.setting.upsert({
       where: { key: def.key },
