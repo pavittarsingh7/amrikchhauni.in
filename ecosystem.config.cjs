@@ -4,7 +4,8 @@ module.exports = {
         name: "acdm",
         cwd: "D:/amrikchhauni.in",
   
-        script: ".next/standalone/server.js",
+        script: "node_modules/next/dist/bin/next",
+        args: "start --port 3000",
   
         autorestart: true,
         restart_delay: 5000,
